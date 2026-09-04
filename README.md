@@ -1,5 +1,8 @@
 # mini_copilot — étape 1
 
+**En ligne : https://mini-copilot.fly.dev** — `/health` est public,
+`/chat` exige le header `X-API-Key`.
+
 Un endpoint `/chat` qui interroge directement l'API Mistral, conteneurisé et
 prêt à déployer. Pas encore de RAG : c'est délibéré. On met d'abord en ligne
 un service trivial, pour que « déployer » soit un problème déjà résolu quand
@@ -189,7 +192,7 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 ## Suite
 
 - [x] **Étape 1** — squelette FastAPI + `/chat` + Docker
-- [ ] **Étape 1b** — déployer sur Fly.io (config prête, voir ci-dessus)
+- [x] **Étape 1b** — déployé sur Fly.io (région cdg, scale-to-zero)
 - [ ] **Étape 2** — ingestion de documents + pgvector + retrieval
 - [ ] **Étape 3** — Langfuse pour tracer chaque appel LLM
 - [ ] **Étape 4** — Ragas + golden set pour mesurer le retrieval
