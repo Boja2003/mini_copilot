@@ -9,3 +9,4 @@ __pycache__/
 .github/
 tests/
 README.md
+fly.toml

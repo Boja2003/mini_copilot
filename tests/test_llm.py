@@ -8,7 +8,8 @@ from app import llm
 
 @pytest.fixture(autouse=True)
 def _config(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("MISTRAL_API_KEY", "cle-de-test")
+    monkeypatch.setenv("MISTRAL_API_KEY", "cle-mistral-de-test")
+    monkeypatch.setenv("API_KEY", "cle-de-service-de-test")
     llm.get_settings.cache_clear()
     yield
     llm.get_settings.cache_clear()

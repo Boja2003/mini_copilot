@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     # message clair, plutot que d'echouer plus tard sur un 401.
     mistral_api_key: str
 
+    # Cle de TON service (a ne pas confondre avec celle de Mistral) : elle
+    # protege /chat une fois l'app en ligne. Obligatoire, et c'est
+    # volontaire — un service expose sur Internet qui demarre sans
+    # authentification parce qu'on a oublie une variable, c'est la facon
+    # classique de se faire vider son quota.
+    api_key: str
+
     mistral_model: str = "ministral-8b-latest"
     mistral_base_url: str = "https://api.mistral.ai/v1"
     request_timeout_seconds: float = 30.0

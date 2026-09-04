@@ -1,0 +1,36 @@
+# Configuration Fly.io. Le nom doit etre unique sur tout Fly : si
+# `fly launch` dit qu'il est pris, change-le ici et dans l'URL.
+app = "mini-copilot"
+primary_region = "cdg"  # Paris
+
+[build]
+  # Vide : Fly detecte le Dockerfile et construit sur SES serveurs.
+  # Docker Desktop n'a donc pas besoin de tourner pour deployer.
+
+[env]
+  MISTRAL_MODEL = "ministral-8b-latest"
+  MISTRAL_BASE_URL = "https://api.mistral.ai/v1"
+  # Les SECRETS ne sont jamais ici : ce fichier est versionne.
+  # Ils passent par `fly secrets set` (voir le README).
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # Scale-to-zero : la machine s'arrete faute de trafic et redemarre a la
+  # requete suivante. Cout au repos : zero. Contrepartie : un reveil a
+  # froid de quelques secondes.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    # Fly interroge /health, qui reste public et ne fait aucun appel externe.
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

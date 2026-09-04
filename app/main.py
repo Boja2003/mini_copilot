@@ -5,15 +5,35 @@ traduire une panne en code HTTP correct. Aucune logique metier ici.
 """
 
 import logging
+import secrets
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from .config import get_settings
 from .llm import LLMError, close_client, generate_answer
 
 logging.basicConfig(level=logging.INFO)
+
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+def require_api_key(provided: str | None = Security(api_key_header)) -> None:
+    """Protege les endpoints couteux : sans ca, une fois en ligne, /chat est
+    un proxy LLM gratuit offert a tout Internet, paye avec ton quota.
+
+    `compare_digest` et pas `==` : la comparaison est a temps constant, donc
+    elle ne fuit pas la cle caractere par caractere via le temps de reponse.
+    """
+    expected = get_settings().api_key
+    if provided is None or not secrets.compare_digest(provided, expected):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cle API manquante ou invalide (header X-API-Key)",
+        )
 
 
 class ChatRequest(BaseModel):
@@ -50,11 +70,17 @@ app = FastAPI(
 @app.get("/health", tags=["infra"])
 async def health() -> dict[str, str]:
     """Sonde de liveness : pas d'appel externe, doit toujours repondre vite.
-    C'est ce que Fly.io / Railway interrogeront pour savoir si l'app vit."""
+    C'est ce que Fly.io interroge pour savoir si l'app vit — elle reste donc
+    volontairement NON protegee par la cle API."""
     return {"status": "ok"}
 
 
-@app.post("/chat", response_model=ChatResponse, tags=["chat"])
+@app.post(
+    "/chat",
+    response_model=ChatResponse,
+    tags=["chat"],
+    dependencies=[Depends(require_api_key)],
+)
 async def chat(request: ChatRequest) -> ChatResponse:
     try:
         answer = await generate_answer(request.question)

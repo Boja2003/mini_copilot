@@ -6,7 +6,10 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      # 127.0.0.1 et pas localhost : dans le conteneur, localhost resout
+      # d'abord en ::1 (IPv6) alors qu'uvicorn n'ecoute qu'en IPv4, et le
+      # healthcheck echouerait en permanence.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 30s
       timeout: 3s
       retries: 3
