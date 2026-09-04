@@ -1,0 +1,26 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+# Etape 2 : le service ci-dessous viendra s'ajouter a cote, et
+# `docker compose up` lancera l'app ET sa base d'un coup.
+#
+#  db:
+#    image: pgvector/pgvector:pg17
+#    environment:
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: rag
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#
+# volumes:
+#   pgdata:
