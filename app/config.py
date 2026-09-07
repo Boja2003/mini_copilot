@@ -28,8 +28,13 @@ class Settings(BaseSettings):
     # classique de se faire vider son quota.
     api_key: str
 
+    # 5433 en local (docker-compose expose la base la), "db" dans le
+    # reseau Compose. Fly.io fournira sa propre URL.
+    database_url: str = "postgresql://rag:rag@localhost:5433/rag"
+
     mistral_model: str = "ministral-8b-latest"
     mistral_base_url: str = "https://api.mistral.ai/v1"
+    mistral_embed_model: str = "mistral-embed"
     request_timeout_seconds: float = 30.0
 
 

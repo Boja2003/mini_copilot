@@ -5,6 +5,12 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      # Dans le reseau Compose, la base s'appelle "db", pas localhost.
+      DATABASE_URL: postgresql://rag:rag@db:5432/rag
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       # 127.0.0.1 et pas localhost : dans le conteneur, localhost resout
       # d'abord en ::1 (IPv6) alors qu'uvicorn n'ecoute qu'en IPv4, et le
@@ -14,16 +20,23 @@ services:
       timeout: 3s
       retries: 3
 
-# Etape 2 : le service ci-dessous viendra s'ajouter a cote, et
-# `docker compose up` lancera l'app ET sa base d'un coup.
-#
-#  db:
-#    image: pgvector/pgvector:pg17
-#    environment:
-#      POSTGRES_PASSWORD: postgres
-#      POSTGRES_DB: rag
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
-#
-# volumes:
-#   pgdata:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+      POSTGRES_DB: rag
+    ports:
+      # Expose en local pour que l'ingestion (lancee hors conteneur) et
+      # psql puissent s'y connecter.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

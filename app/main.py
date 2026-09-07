@@ -13,7 +13,9 @@ from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from .config import get_settings
-from .llm import LLMError, close_client, generate_answer
+from .db import close_pool, init_schema, open_pool
+from .llm import generate_answer
+from .mistral import LLMError, close_client
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,17 +47,36 @@ class ChatRequest(BaseModel):
     )
 
 
+class Source(BaseModel):
+    """D'ou vient un passage utilise pour repondre.
+
+    Exposer les sources n'est pas cosmetique : c'est ce qui rend une reponse
+    verifiable. Sans elles, l'utilisateur doit croire le modele sur parole.
+    """
+
+    document: str
+    page: int | None
+    distance: float
+
+
 class ChatResponse(BaseModel):
     answer: str
     model: str
+    sources: list[Source]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Au demarrage : on lit la config tout de suite. Si MISTRAL_API_KEY
-    # manque, l'app refuse de demarrer ici, pas a la premiere requete.
+    # Au demarrage : on lit la config tout de suite. Si une variable
+    # obligatoire manque, l'app refuse de demarrer ici, pas a la premiere
+    # requete.
     get_settings()
+    # Le schema avant le pool : sans le type `vector` en base, aucune
+    # connexion du pool ne peut s'ouvrir (voir db._configurer).
+    await init_schema()
+    await open_pool()
     yield
+    await close_pool()
     await close_client()
 
 
@@ -83,9 +104,16 @@ async def health() -> dict[str, str]:
 )
 async def chat(request: ChatRequest) -> ChatResponse:
     try:
-        answer = await generate_answer(request.question)
+        reponse = await generate_answer(request.question)
     except LLMError as exc:
         # 502 et pas 500 : la faute vient d'un service en amont, pas de nous.
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-    return ChatResponse(answer=answer, model=get_settings().mistral_model)
+    return ChatResponse(
+        answer=reponse.texte,
+        model=get_settings().mistral_model,
+        sources=[
+            Source(document=p.titre, page=p.page, distance=round(p.distance, 4))
+            for p in reponse.passages
+        ],
+    )

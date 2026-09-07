@@ -11,19 +11,38 @@ on attaquera le retrieval.
 ## Le trajet d'une requête
 
 ```
-POST /chat  ──►  main.py         validation Pydantic, gestion d'erreur HTTP
-                    │
-                    ▼
-                 llm.py          construit le prompt, POST vers l'API Mistral
-                    │                  ▲
-                    ▼                  └── étape 2 : le retrieval s'insère ICI
-                 config.py       lit la clé API depuis l'environnement
+POST /chat ──► main.py        clé X-API-Key, validation Pydantic, codes HTTP
+                  │
+                  ▼
+              llm.py          orchestre le RAG
+                  │
+                  ├──► retrieval.py ──► embeddings.py   question → vecteur
+                  │         │                            (mistral-embed)
+                  │         └──► db.py   pgvector : ORDER BY embedding <=> ?
+                  │                      → les 5 passages les plus proches
+                  │
+                  └──► mistral.py       prompt = passages + question → réponse
+```
+
+Ingestion (hors ligne, `python -m app.ingest`) :
+
+```
+fichier ──► parsers.py ──► chunking.py ──► embeddings.py ──► db.py
+            pdf / pptx     ~1200 car.      vecteurs 1024D    documents
+            md / txt       + recouvrement  par lots de 32    + chunks
 ```
 
 | Fichier | Rôle |
 |---|---|
 | `app/main.py` | Couche HTTP. Valide, délègue, traduit les pannes en codes HTTP. |
-| `app/llm.py` | La couture du projet. Tout ce qui parle au LLM. |
+| `app/llm.py` | Orchestration du RAG : chercher les passages, puis répondre. |
+| `app/retrieval.py` | Recherche vectorielle (`<=>` de pgvector). |
+| `app/embeddings.py` | Texte → vecteurs, par lots, avec back-off sur quota. |
+| `app/parsers.py` | Un parser par format + normalisation du texte. |
+| `app/chunking.py` | Découpage en passages indexables. |
+| `app/ingest.py` | Pipeline d'ingestion, en ligne de commande. |
+| `app/db.py` | Postgres + pgvector, SQL écrit à la main. |
+| `app/mistral.py` | Client HTTP partagé vers Mistral. |
 | `app/config.py` | Config et secrets, lus depuis l'environnement. |
 | `Dockerfile` | Empaquetage : la fin du « ça marche chez moi ». |
 | `docker-compose.yml` | Un seul service pour l'instant ; Postgres+pgvector s'ajoutera à l'étape 2. |
@@ -58,6 +77,40 @@ uvicorn app.main:app --reload
 
 3. Plus simple que curl : ouvre **http://localhost:8000/docs**. FastAPI
    génère une interface de test interactive à partir de tes modèles Pydantic.
+
+## Le corpus
+
+```bash
+docker compose up -d db
+```
+
+```bash
+python -m app.ingest "C:/chemin/vers/tes/cours"
+```
+
+Formats lus : `.pdf`, `.pptx`, `.md`, `.txt`, `.rst`. Un format inconnu est
+signalé et ignoré, pas une erreur fatale. Ajouter le `.docx` demain = écrire
+une fonction et l'inscrire dans `PARSERS`, rien d'autre.
+
+L'ingestion est **rejouable** : une empreinte SHA-256 par fichier permet de
+ne retraiter que ce qui a changé. `--force` réindexe tout.
+
+### Ce que ce corpus a appris
+
+Relevé sur 15 documents (6 PDF, 9 PPTX) → **1076 chunks** :
+
+- **Les ligatures des PDF LaTeX cassent la recherche.** `final` y est encodé
+  par le caractère unique U+FB01 : sans normalisation, il ne matche jamais
+  une recherche sur `final`.
+- **Postgres refuse les octets NUL** que produit l'extraction PDF. Nettoyés
+  à la normalisation.
+- **Le seuil de distance ne détecte pas le hors-sujet.** Mesuré : questions
+  du cours 0.145–0.286, questions hors-sujet 0.272–0.396 — **les deux
+  distributions se chevauchent**, aucun seuil ne sépare proprement. Le
+  filtre de distance n'est donc qu'un garde-fou grossier ; c'est le prompt
+  système qui interdit au modèle de répondre hors des passages fournis.
+- **Les tableaux et les notes de présentateur des `.pptx`** portent souvent
+  l'essentiel du cours : ils sont extraits, pas seulement les titres.
 
 ## Tests et qualité
 
@@ -193,7 +246,7 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 
 - [x] **Étape 1** — squelette FastAPI + `/chat` + Docker
 - [x] **Étape 1b** — déployé sur Fly.io (région cdg, scale-to-zero)
-- [ ] **Étape 2** — ingestion de documents + pgvector + retrieval
+- [x] **Étape 2** — ingestion multi-format + pgvector + retrieval
 - [ ] **Étape 3** — Langfuse pour tracer chaque appel LLM
 - [ ] **Étape 4** — Ragas + golden set pour mesurer le retrieval
 - [ ] **Étape 5** — couche agent (LangGraph) pour le multi-étapes

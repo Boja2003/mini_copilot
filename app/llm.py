@@ -1,64 +1,57 @@
-"""La couture du projet : tout ce qui parle au LLM vit ici.
+"""La couture du projet : question -> passages -> reponse.
 
-L'appel est ecrit en HTTP brut avec httpx, pas avec le SDK Mistral :
-un POST, un header d'authentification, un corps JSON. Aucune magie.
+C'est ici que le RAG se fait, exactement a l'endroit annonce a l'etape 1 :
+entre « recevoir la question » et « appeler le modele », on va chercher les
+passages pertinents du corpus et on les colle dans le prompt.
 
-C'est ici — et nulle part ailleurs — que le RAG viendra se greffer a
-l'etape 2 : entre `question` et `messages`, on inserera le retrieval et
-on collera les passages retrouves dans le prompt. Le reste du code ne
-bougera pas.
+Le modele ne « connait » pas tes cours. On les lui met sous les yeux a
+chaque question, et on lui interdit de repondre autre chose.
 """
 
 import logging
+from dataclasses import dataclass
 
 import httpx
 
 from .config import get_settings
+from .mistral import LLMError, decrire_erreur_http, get_client
+from .retrieval import Passage, chercher, construire_contexte
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = (
-    "Tu es un assistant precis et concis. Reponds en francais. "
-    "Si tu ne sais pas, dis-le franchement plutot que d'inventer."
-)
+# Le calibrage a montre que la distance vectorielle ne suffit pas a
+# distinguer une question du cours d'une question hors-sujet (les deux
+# distributions se chevauchent). C'est donc le prompt qui porte le
+# garde-fou : on ordonne au modele de s'en tenir aux passages fournis et
+# d'admettre quand ils ne repondent pas. Un RAG qui invente est pire
+# qu'inutile : il est credible ET faux.
+PROMPT_SYSTEME = """Tu es un assistant qui repond a partir des supports de \
+cours fournis, et UNIQUEMENT a partir d'eux.
 
-_client: httpx.AsyncClient | None = None
+Regles :
+- Appuie chaque affirmation sur les passages numerotes ci-dessous, et cite \
+la source entre crochets, par exemple [2].
+- Si les passages ne contiennent pas de quoi repondre, dis-le franchement : \
+« Je ne trouve pas la reponse dans tes supports de cours. » N'utilise alors \
+PAS tes connaissances generales.
+- Ne complete jamais un passage par ce que tu crois savoir par ailleurs.
+- Reponds en francais, de facon claire et pedagogique."""
 
-
-class LLMError(RuntimeError):
-    """Le fournisseur de LLM n'a pas pu repondre."""
-
-
-def get_client() -> httpx.AsyncClient:
-    """Client HTTP partage : on reutilise les connexions au lieu d'en
-    rouvrir une a chaque requete."""
-    global _client
-    if _client is None:
-        settings = get_settings()
-        _client = httpx.AsyncClient(
-            base_url=settings.mistral_base_url,
-            timeout=settings.request_timeout_seconds,
-        )
-    return _client
-
-
-async def close_client() -> None:
-    """Appele a l'extinction de l'app (voir le lifespan dans main.py)."""
-    global _client
-    if _client is not None:
-        await _client.aclose()
-        _client = None
+PROMPT_SANS_PASSAGE = """Tu es un assistant qui repond a partir des supports \
+de cours de l'utilisateur. Aucun passage pertinent n'a ete trouve pour cette \
+question. Reponds uniquement : « Je ne trouve pas la reponse dans tes \
+supports de cours. », puis propose en une phrase de reformuler la question."""
 
 
-async def generate_answer(question: str) -> str:
+@dataclass(frozen=True)
+class Reponse:
+    texte: str
+    passages: list[Passage]
+
+
+async def _appeler_mistral(messages: list[dict[str, str]]) -> str:
     settings = get_settings()
-    payload = {
-        "model": settings.mistral_model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": question},
-        ],
-    }
+    payload = {"model": settings.mistral_model, "messages": messages}
     headers = {"Authorization": f"Bearer {settings.mistral_api_key}"}
 
     try:
@@ -72,10 +65,10 @@ async def generate_answer(question: str) -> str:
 
     if response.is_error:
         logger.error("LLM HTTP %s : %s", response.status_code, response.text[:500])
-        raise LLMError(_describe_http_error(response))
+        raise LLMError(decrire_erreur_http(response))
 
     try:
-        content = response.json()["choices"][0]["message"]["content"]
+        contenu = response.json()["choices"][0]["message"]["content"]
     except (KeyError, IndexError, ValueError) as exc:
         logger.exception("Reponse LLM inattendue")
         raise LLMError("Reponse du LLM inexploitable") from exc
@@ -84,42 +77,35 @@ async def generate_answer(question: str) -> str:
     # de tokens epuise...). On refuse de faire passer ca pour une reussite :
     # une reponse vide qui remonte en 200 est un bug qu'on cherche pendant
     # des heures.
-    if not content or not content.strip():
+    if not contenu or not contenu.strip():
         logger.error("Le LLM a renvoye un contenu vide : %s", response.text[:500])
         raise LLMError("Le LLM a renvoye une reponse vide")
 
-    return content
+    return contenu
 
 
-def _describe_http_error(response: httpx.Response) -> str:
-    """Transforme l'erreur du fournisseur en message actionnable.
+async def generate_answer(question: str) -> Reponse:
+    """Le pipeline RAG complet : chercher, puis repondre a partir du trouve."""
+    passages = await chercher(question)
 
-    Un `502 : le LLM a repondu 429` n'aide personne ; il faut savoir *quoi*
-    faire. On remonte donc le message du fournisseur et, pour les causes
-    frequentes, la marche a suivre.
-    """
-    try:
-        provider_message = response.json().get("message", "")
-    except ValueError:
-        provider_message = response.text[:200]
+    if not passages:
+        texte = await _appeler_mistral(
+            [
+                {"role": "system", "content": PROMPT_SANS_PASSAGE},
+                {"role": "user", "content": question},
+            ]
+        )
+        return Reponse(texte=texte, passages=[])
 
-    hints = {
-        401: "cle API invalide : verifie MISTRAL_API_KEY dans .env",
-        403: "cle API sans les droits necessaires",
-        404: "modele inconnu : verifie MISTRAL_MODEL",
-        422: "requete refusee par le fournisseur",
-        # Chez Mistral, le quota est PAR MODELE : un compte parfaitement
-        # actif peut avoir 0 req/min sur un modele et 750 sur un autre.
-        # L'en-tete x-ratelimit-limit-req-minute tranche en une seconde.
-        429: (
-            "quota epuise pour CE modele (la limite est par modele) — "
-            "regarde l'en-tete x-ratelimit-limit-req-minute ; s'il vaut 0, "
-            "change MISTRAL_MODEL"
-        ),
-    }
-    hint = hints.get(response.status_code, "erreur cote fournisseur")
-
-    detail = f"LLM HTTP {response.status_code} ({hint})"
-    if provider_message:
-        detail += f" : {provider_message}"
-    return detail
+    contexte = construire_contexte(passages)
+    texte = await _appeler_mistral(
+        [
+            {"role": "system", "content": PROMPT_SYSTEME},
+            {
+                "role": "user",
+                "content": f"Passages issus de mes cours :\n\n{contexte}\n\n"
+                f"Question : {question}",
+            },
+        ]
+    )
+    return Reponse(texte=texte, passages=passages)
