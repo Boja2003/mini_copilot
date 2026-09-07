@@ -1,5 +1,8 @@
+# Secrets. Le motif attrape aussi les variantes sans point initial :
+# un fichier nomme `env.prod` avait echappe a la regle `.env.prod`.
 .env
-.env.prod
+*env.prod
+*env.local
 .venv/
 venv/
 __pycache__/
