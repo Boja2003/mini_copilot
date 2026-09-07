@@ -6,6 +6,7 @@ se passe vraiment — or c'est exactement ce qu'on veut apprendre ici.
 """
 
 import logging
+import re
 
 import psycopg
 from pgvector.psycopg import register_vector_async
@@ -105,17 +106,34 @@ async def close_pool() -> None:
         _pool = None
 
 
+# Sans delai explicite, une base injoignable fait attendre l'app
+# indefiniment au demarrage : le deploiement expire sans jamais dire
+# pourquoi. Mieux vaut echouer vite, et fort.
+DELAI_CONNEXION_SECONDES = 10
+
+
 async def init_schema(avec_index_vectoriel: bool = True) -> None:
     """Cree extension, tables et index. Idempotent : on peut la rejouer.
 
     Volontairement sur une connexion directe, PAS sur le pool : le pool ne
-    peut pas s ouvrir tant que le type `vector` n existe pas (voir
-    `_configurer`). C est l ordre d amorcage de la base.
+    peut pas s'ouvrir tant que le type `vector` n'existe pas (voir
+    `_configurer`). C'est l'ordre d'amorcage de la base.
     """
-    async with await psycopg.AsyncConnection.connect(
-        get_settings().database_url, autocommit=True
-    ) as conn:
-        await conn.execute(SCHEMA)
-        if avec_index_vectoriel:
-            await conn.execute(INDEX_VECTORIEL)
+    url = get_settings().database_url
+    try:
+        async with await psycopg.AsyncConnection.connect(
+            url, autocommit=True, connect_timeout=DELAI_CONNEXION_SECONDES
+        ) as conn:
+            await conn.execute(SCHEMA)
+            if avec_index_vectoriel:
+                await conn.execute(INDEX_VECTORIEL)
+    except psycopg.OperationalError as exc:
+        # On masque le mot de passe : ce message finit dans les logs, et
+        # les logs finissent par etre partages.
+        sans_secret = re.sub(r"://[^:]+:[^@]+@", "://***:***@", url)
+        raise RuntimeError(
+            f"Base de donnees injoignable ({sans_secret}) : {exc}. "
+            "Verifie que la base tourne (docker compose up -d db) et que "
+            "DATABASE_URL est correct."
+        ) from exc
     logger.info("Schema pret")
