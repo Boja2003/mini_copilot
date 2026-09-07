@@ -60,8 +60,12 @@ async def _appeler_mistral(messages: list[dict[str, str]]) -> str:
         )
     except httpx.HTTPError as exc:
         # Reseau coupe, DNS, timeout... la dependance externe est tombee.
+        # On nomme le TYPE d'exception : httpx.ReadTimeout a un str() vide,
+        # et « Appel au LLM impossible :  » n'aide personne a 3h du matin.
         logger.exception("Appel LLM impossible")
-        raise LLMError(f"Appel au LLM impossible : {exc}") from exc
+        raise LLMError(
+            f"Appel au LLM impossible ({type(exc).__name__}) : {exc}".rstrip(" :")
+        ) from exc
 
     if response.is_error:
         logger.error("LLM HTTP %s : %s", response.status_code, response.text[:500])

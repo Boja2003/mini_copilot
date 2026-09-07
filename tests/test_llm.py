@@ -128,3 +128,23 @@ async def test_sans_passage_le_modele_recoit_la_consigne_de_refus(
 
     assert reponse.passages == []
     assert captures[0][0]["content"] == llm.PROMPT_SANS_PASSAGE
+
+
+async def test_exception_muette_reste_diagnosticable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """httpx.ReadTimeout a un str() vide : sans le type, le message est
+    « Appel au LLM impossible :  » et ne dit rien. Cas rencontre en
+    production."""
+
+    async def timeout(self, url, **kwargs):
+        raise httpx.ReadTimeout("")
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", timeout)
+    import app.mistral
+
+    app.mistral._client = None
+
+    with pytest.raises(llm.LLMError) as exc:
+        await llm._appeler_mistral([{"role": "user", "content": "s"}])
+    assert "ReadTimeout" in str(exc.value)

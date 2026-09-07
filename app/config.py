@@ -35,7 +35,11 @@ class Settings(BaseSettings):
     mistral_model: str = "ministral-8b-latest"
     mistral_base_url: str = "https://api.mistral.ai/v1"
     mistral_embed_model: str = "mistral-embed"
-    request_timeout_seconds: float = 30.0
+    # 30 s suffisaient avant le RAG. Avec 5 passages en contexte, la
+    # reponse est bien plus longue a generer : mesure en production,
+    # une question sur un algorithme depassait les 30 s et tombait en
+    # httpx.ReadTimeout.
+    request_timeout_seconds: float = 90.0
 
 
 @lru_cache
