@@ -104,6 +104,14 @@ Relevé sur 15 documents (6 PDF, 9 PPTX) → **1076 chunks** :
   une recherche sur `final`.
 - **Postgres refuse les octets NUL** que produit l'extraction PDF. Nettoyés
   à la normalisation.
+- **La recherche vectorielle seule rate les noms propres.** « Quelles sont
+  les étapes de l'algorithme de Welsh & Powell ? » ne remontait PAS le cours
+  sur Welsh & Powell : la tournure « étapes de l'algorithme » domine le
+  vecteur et attire le pseudo-code de Floyd-Warshall. Reformulée en
+  « algorithme Welsh Powell coloration », la même recherche trouvait le bon
+  passage à 0.097. D'où la **recherche hybride** : vectoriel + mots-clés,
+  fusionnés par RRF. Le vectoriel comprend le sens, les mots-clés ne ratent
+  jamais un terme rare.
 - **Le seuil de distance ne détecte pas le hors-sujet.** Mesuré : questions
   du cours 0.145–0.286, questions hors-sujet 0.272–0.396 — **les deux
   distributions se chevauchent**, aucun seuil ne sépare proprement. Le

@@ -38,10 +38,23 @@ CREATE TABLE IF NOT EXISTS chunks (
     position    INT NOT NULL,
     page        INT,
     contenu     TEXT NOT NULL,
-    embedding   vector({DIMENSION_EMBEDDING}) NOT NULL
+    embedding   vector({DIMENSION_EMBEDDING}) NOT NULL,
+    -- Colonne generee : Postgres la recalcule tout seul a chaque INSERT ou
+    -- UPDATE de `contenu`. Impossible qu'elle se desynchronise du texte.
+    -- Config 'simple' et pas 'french' : le corpus melange francais et
+    -- anglais, et on cherche surtout des termes rares et des noms propres
+    -- ("Welsh", "Powell", "Dijkstra") que la racinisation abimerait.
+    tsv         tsvector GENERATED ALWAYS AS (to_tsvector('simple', contenu))
+                STORED
 );
 
 CREATE INDEX IF NOT EXISTS chunks_document_id_idx ON chunks (document_id);
+
+-- Pour les bases creees avant l'ajout de la recherche par mots-cles.
+ALTER TABLE chunks ADD COLUMN IF NOT EXISTS tsv tsvector
+    GENERATED ALWAYS AS (to_tsvector('simple', contenu)) STORED;
+
+CREATE INDEX IF NOT EXISTS chunks_tsv_idx ON chunks USING gin (tsv);
 """
 
 # Index vectoriel separe : sa creation est longue, on la fait apres
