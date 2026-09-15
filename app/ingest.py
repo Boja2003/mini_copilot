@@ -24,6 +24,7 @@ from . import chunking, parsers
 from .boucle import configurer as configurer_boucle
 from .db import close_pool, get_pool, init_schema, open_pool
 from .embeddings import embarquer
+from .observabilite import desactiver as desactiver_traces
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger("ingest")
@@ -158,5 +159,8 @@ if __name__ == "__main__":
         "--force", action="store_true", help="reindexe meme les fichiers inchanges"
     )
     args = parseur.parse_args()
+    # L'ingestion ne trace pas : des dizaines d'appels d'embeddings par
+    # document, sans question ni reponse a qui les rattacher.
+    desactiver_traces()
     configurer_boucle()
     asyncio.run(principal(args.dossier, args.force))

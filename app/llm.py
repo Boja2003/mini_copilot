@@ -10,6 +10,7 @@ chaque question, et on lui interdit de repondre autre chose.
 
 import logging
 from dataclasses import dataclass
+from functools import partial
 
 from .config import get_settings
 from .mistral import LLMError, appeler_chat
@@ -48,8 +49,10 @@ question. Reponds uniquement : « Je ne trouve pas la reponse dans tes \
 supports de cours. », puis propose en une phrase de reformuler la question."""
 
 # Nom historique conserve dans ce module : la fonction vit desormais dans
-# mistral.py (voir sa docstring pour la raison du deplacement).
-_appeler_mistral = appeler_chat
+# mistral.py (voir sa docstring pour la raison du deplacement). Le nom
+# d'etape « llm-reponse » la distingue, dans les traces, de l'appel de
+# reecriture.
+_appeler_mistral = partial(appeler_chat, nom="llm-reponse")
 
 
 @dataclass(frozen=True)

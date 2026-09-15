@@ -16,6 +16,12 @@ primary_region = "cdg"  # Paris
   # de 750 req/min au lieu de 188.
   REECRITURE_REQUETES = "true"
   MISTRAL_REECRITURE_MODEL = "ministral-3b-latest"
+  # Observabilite (etape 3). L'environnement separe les traces de production
+  # de celles du developpement local dans le meme projet Langfuse. Les cles
+  # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY sont des SECRETS : elles passent
+  # par `fly secrets set`, jamais ici.
+  LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
+  LANGFUSE_ENVIRONMENT = "production"
   # Les SECRETS ne sont jamais ici : ce fichier est versionne.
   # Ils passent par `fly secrets set` (voir le README).
 

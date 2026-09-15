@@ -14,6 +14,7 @@ from pgvector import Vector
 
 from .db import get_pool
 from .embeddings import embarquer, embarquer_un
+from .observabilite import observer
 from .reecriture import reformuler
 
 logger = logging.getLogger(__name__)
@@ -88,33 +89,51 @@ LIMIT %(n)s
 """
 
 
-async def _chercher_vecteur(vecteur: Vector, texte: str, nb: int) -> list[Passage]:
-    """Une recherche hybride, pour un vecteur deja calcule et son texte."""
-    async with get_pool().connection() as conn:
-        lignes = await (
-            await conn.execute(
-                SQL_HYBRIDE,
-                {
-                    "v": vecteur,
-                    "q": texte,
-                    "k": NB_CANDIDATS,
-                    "dmax": DISTANCE_MAXIMALE,
-                    "krrf": K_RRF,
-                    "n": nb,
-                },
-            )
-        ).fetchall()
+def _resume(passages: list[Passage]) -> list[dict]:
+    """Ce qu'une trace retient des passages : de quoi relire le classement,
+    sans recopier le texte integral des cours a chaque requete."""
     return [
-        Passage(
-            id=r[0],
-            contenu=r[1],
-            source=r[2],
-            titre=r[3],
-            page=r[4],
-            distance=float(r[5]),
-        )
-        for r in lignes
+        {"document": p.titre, "page": p.page, "distance": round(p.distance, 4)}
+        for p in passages
     ]
+
+
+async def _chercher_vecteur(vecteur: Vector, texte: str, nb: int) -> list[Passage]:
+    """Une recherche hybride, pour un vecteur deja calcule et son texte.
+
+    Tracee comme une etape a part : c'est la seule qui touche la base, donc
+    celle qui mesure la latence de Neon.
+    """
+    with observer(
+        "recherche-sql", input={"requete": texte, "candidats": NB_CANDIDATS}
+    ) as etape:
+        async with get_pool().connection() as conn:
+            lignes = await (
+                await conn.execute(
+                    SQL_HYBRIDE,
+                    {
+                        "v": vecteur,
+                        "q": texte,
+                        "k": NB_CANDIDATS,
+                        "dmax": DISTANCE_MAXIMALE,
+                        "krrf": K_RRF,
+                        "n": nb,
+                    },
+                )
+            ).fetchall()
+        passages = [
+            Passage(
+                id=r[0],
+                contenu=r[1],
+                source=r[2],
+                titre=r[3],
+                page=r[4],
+                distance=float(r[5]),
+            )
+            for r in lignes
+        ]
+        etape.update(output=_resume(passages))
+    return passages
 
 
 async def chercher(question: str, nb: int = NB_PASSAGES) -> list[Passage]:
@@ -135,8 +154,12 @@ async def chercher(question: str, nb: int = NB_PASSAGES) -> list[Passage]:
     des RANGS et non des scores, ce qui evite d'avoir a comparer une
     distance cosinus a un ts_rank — deux grandeurs sans commune mesure.
     """
-    vecteur = Vector(await embarquer_un(question))
-    passages = await _chercher_vecteur(vecteur, question, nb)
+    with observer(
+        "recherche", "retriever", input={"question": question, "strategie": "hybride"}
+    ) as etape:
+        vecteur = Vector(await embarquer_un(question))
+        passages = await _chercher_vecteur(vecteur, question, nb)
+        etape.update(output=_resume(passages))
     logger.info(
         "Retrieval hybride : %s passages (meilleure distance %.3f)",
         len(passages),
@@ -213,8 +236,14 @@ async def chercher_avec_reecriture_detail(
     n'est pas garantie reproductible, donc l'evaluation doit les enregistrer
     au moment de la mesure pour pouvoir expliquer un resultat apres coup.
     """
-    requetes = await reformuler(question)
-    passages = await rechercher_requetes(requetes, nb)
+    with observer(
+        "recherche",
+        "retriever",
+        input={"question": question, "strategie": "reecriture"},
+    ) as etape:
+        requetes = await reformuler(question)
+        passages = await rechercher_requetes(requetes, nb)
+        etape.update(output={"requetes": requetes, "passages": _resume(passages)})
     logger.info(
         "Retrieval avec reecriture : %s requetes -> %s passages",
         len(requetes),

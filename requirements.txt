@@ -11,3 +11,6 @@ pgvector==0.4.1
 # Etape 2 : lecture des documents
 pypdf==6.17.0
 python-pptx==1.0.2
+
+# Etape 3 : observabilite
+langfuse==4.15.2

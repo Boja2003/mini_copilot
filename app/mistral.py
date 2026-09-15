@@ -12,6 +12,7 @@ import logging
 import httpx
 
 from .config import get_settings
+from .observabilite import observer, tokens_mistral
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ def decrire_erreur_http(response: httpx.Response) -> str:
 async def appeler_chat(
     messages: list[dict[str, str]],
     *,
+    nom: str = "llm",
     modele: str | None = None,
     temperature: float | None = None,
     format_json: bool = False,
@@ -88,13 +90,39 @@ async def appeler_chat(
     Deplace depuis llm.py : la reecriture de requete, appelee par le
     retrieval, en a besoin aussi. Or llm.py importe deja le retrieval — le
     laisser la-bas aurait recree un cycle d'imports.
+
+    Chaque appel est une etape « generation » de la trace : `nom` distingue
+    la reecriture de la reponse, et les tokens consommes y sont enregistres.
     """
     settings = get_settings()
-    payload: dict = {"model": modele or settings.mistral_model, "messages": messages}
+    modele = modele or settings.mistral_model
+    payload: dict = {"model": modele, "messages": messages}
+    parametres: dict = {}
     if temperature is not None:
         payload["temperature"] = temperature
+        parametres["temperature"] = temperature
     if format_json:
         payload["response_format"] = {"type": "json_object"}
+        parametres["response_format"] = "json_object"
+
+    with observer(
+        nom,
+        "generation",
+        model=modele,
+        input=messages,
+        model_parameters=parametres or None,
+    ) as generation:
+        try:
+            contenu, usage = await _executer_chat(payload)
+        except LLMError as exc:
+            generation.update(level="ERROR", status_message=str(exc))
+            raise
+        generation.update(output=contenu, usage_details=tokens_mistral(usage))
+        return contenu
+
+
+async def _executer_chat(payload: dict) -> tuple[str, dict]:
+    settings = get_settings()
     headers = {"Authorization": f"Bearer {settings.mistral_api_key}"}
 
     try:
@@ -115,7 +143,8 @@ async def appeler_chat(
         raise LLMError(decrire_erreur_http(response))
 
     try:
-        contenu = response.json()["choices"][0]["message"]["content"]
+        donnees = response.json()
+        contenu = donnees["choices"][0]["message"]["content"]
     except (KeyError, IndexError, ValueError) as exc:
         logger.exception("Reponse LLM inattendue")
         raise LLMError("Reponse du LLM inexploitable") from exc
@@ -128,4 +157,4 @@ async def appeler_chat(
         logger.error("Le LLM a renvoye un contenu vide : %s", response.text[:500])
         raise LLMError("Le LLM a renvoye une reponse vide")
 
-    return contenu
+    return contenu, donnees.get("usage") or {}

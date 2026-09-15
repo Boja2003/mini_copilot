@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     # montre qu'elle en vaut le cout.
     reecriture_requetes: bool = False
     mistral_reecriture_model: str = "ministral-8b-latest"
+
+    # Observabilite (voir app/observabilite.py). Sans les deux cles, le
+    # tracage est desactive et l'application tourne exactement comme avant.
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_base_url: str = "https://cloud.langfuse.com"
+    langfuse_environment: str = "local"
+    # Interrupteur explicite : les tests le coupent (tests/conftest.py).
+    langfuse_active: bool = True
     # 30 s suffisaient avant le RAG. Avec 5 passages en contexte, la
     # reponse est bien plus longue a generer : mesure en production,
     # une question sur un algorithme depassait les 30 s et tombait en

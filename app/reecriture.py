@@ -15,6 +15,7 @@ import logging
 
 from .config import get_settings
 from .mistral import LLMError, appeler_chat
+from .observabilite import observer
 
 logger = logging.getLogger(__name__)
 
@@ -59,31 +60,41 @@ async def reformuler(question: str) -> list[str]:
     panne.
     """
     settings = get_settings()
-    try:
-        brut = await appeler_chat(
-            [
-                {
-                    "role": "system",
-                    "content": PROMPT_REECRITURE.format(n=NB_REFORMULATIONS),
-                },
-                {"role": "user", "content": question},
-            ],
-            modele=settings.mistral_reecriture_model,
-            # Temperature nulle : elle reduit la variabilite, sans la supprimer.
-            # Mesure : trois appels identiques ne donnent presque jamais les
-            # memes requetes, et le parametre random_seed de Mistral n'y change
-            # rien. D'ou l'enregistrement des requetes dans les resultats
-            # d'evaluation (voir eval/retrieval.py).
-            temperature=0.0,
-            format_json=True,
-        )
-        reformulations = _extraire_requetes(brut)
-    except (LLMError, ValueError) as exc:
-        logger.warning("Reecriture impossible, question seule : %s", exc)
-        return [question]
+    with observer("reecriture", "chain", input={"question": question}) as etape:
+        try:
+            brut = await appeler_chat(
+                [
+                    {
+                        "role": "system",
+                        "content": PROMPT_REECRITURE.format(n=NB_REFORMULATIONS),
+                    },
+                    {"role": "user", "content": question},
+                ],
+                nom="llm-reecriture",
+                modele=settings.mistral_reecriture_model,
+                # Temperature nulle : elle reduit la variabilite, sans la supprimer.
+                # Mesure : trois appels identiques ne donnent presque jamais les
+                # memes requetes, et le parametre random_seed de Mistral n'y change
+                # rien. D'ou l'enregistrement des requetes dans les resultats
+                # d'evaluation (voir eval/retrieval.py).
+                temperature=0.0,
+                format_json=True,
+            )
+            reformulations = _extraire_requetes(brut)
+        except (LLMError, ValueError) as exc:
+            logger.warning("Reecriture impossible, question seule : %s", exc)
+            # Le repli est invisible pour l'utilisateur ; il doit rester
+            # visible pour nous, d'ou le niveau WARNING dans la trace.
+            etape.update(
+                output=[question],
+                level="WARNING",
+                status_message=f"repli sur la question seule : {exc}",
+            )
+            return [question]
 
-    requetes = [question]
-    for reformulation in reformulations[:NB_REFORMULATIONS]:
-        if reformulation.casefold() not in {r.casefold() for r in requetes}:
-            requetes.append(reformulation)
-    return requetes
+        requetes = [question]
+        for reformulation in reformulations[:NB_REFORMULATIONS]:
+            if reformulation.casefold() not in {r.casefold() for r in requetes}:
+                requetes.append(reformulation)
+        etape.update(output=requetes)
+        return requetes

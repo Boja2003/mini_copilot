@@ -15,6 +15,7 @@ import httpx
 
 from .config import get_settings
 from .mistral import LLMError, get_client
+from .observabilite import observer, tokens_mistral
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +23,43 @@ logger = logging.getLogger(__name__)
 # de l'API, et assez gros pour que le quota ne soit pas le facteur limitant.
 TAILLE_LOT = 32
 TENTATIVES_MAX = 5
+# Au-dela, on ne recopie pas les textes dans la trace : un lot d'ingestion
+# publierait des pages entieres de cours pour rien.
+TEXTES_TRACES_MAX = 4
 
 
 async def _appeler_embeddings(textes: list[str]) -> list[list[float]]:
+    settings = get_settings()
+    with observer(
+        "mistral-embeddings",
+        "embedding",
+        model=settings.mistral_embed_model,
+        input=textes if len(textes) <= TEXTES_TRACES_MAX else f"{len(textes)} textes",
+    ) as etape:
+        try:
+            vecteurs, usage, attente = await _executer_embeddings(textes)
+        except LLMError as exc:
+            etape.update(level="ERROR", status_message=str(exc))
+            raise
+        etape.update(
+            output=f"{len(vecteurs)} vecteurs",
+            usage_details=tokens_mistral(usage),
+            # Le temps passe a attendre le quota apparait dans la duree de
+            # l'etape ; on le chiffre pour ne pas l'imputer a l'API.
+            metadata={"attente_quota_s": attente},
+        )
+        return vecteurs
+
+
+async def _executer_embeddings(
+    textes: list[str],
+) -> tuple[list[list[float]], dict, float]:
     settings = get_settings()
     payload = {"model": settings.mistral_embed_model, "input": textes}
     headers = {"Authorization": f"Bearer {settings.mistral_api_key}"}
 
     delai = 2.0
+    attente = 0.0
     for tentative in range(1, TENTATIVES_MAX + 1):
         try:
             reponse = await get_client().post(
@@ -48,6 +78,7 @@ async def _appeler_embeddings(textes: list[str]) -> list[list[float]]:
                 delai,
             )
             await asyncio.sleep(delai)
+            attente += delai
             delai *= 2
             continue
 
@@ -56,12 +87,13 @@ async def _appeler_embeddings(textes: list[str]) -> list[list[float]]:
                 f"Embeddings HTTP {reponse.status_code} : {reponse.text[:200]}"
             )
 
-        donnees = reponse.json()["data"]
+        corps = reponse.json()
+        donnees = corps["data"]
         # L'API garantit l'ordre, mais on trie sur l'index par securite :
         # un decalage ici associerait chaque texte au vecteur d'un autre,
         # et le bug serait invisible jusqu'a ce que le retrieval deraille.
         donnees.sort(key=lambda d: d["index"])
-        return [d["embedding"] for d in donnees]
+        return [d["embedding"] for d in donnees], corps.get("usage") or {}, attente
 
     raise LLMError(
         f"Quota embeddings toujours sature apres {TENTATIVES_MAX} tentatives"

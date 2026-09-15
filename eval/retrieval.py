@@ -28,6 +28,7 @@ from app.boucle import configurer as configurer_boucle
 from app.config import get_settings
 from app.db import close_pool, get_pool, open_pool
 from app.mistral import close_client
+from app.observabilite import desactiver as desactiver_traces
 from app.retrieval import Passage
 
 from .metriques import hit_at_k, moyenne, precision_at_k, reciprocal_rank
@@ -344,6 +345,9 @@ if __name__ == "__main__":
     parseur.add_argument("--strategie", default="hybride", choices=sorted(STRATEGIES))
     parseur.add_argument("--comparer", help="nom d'un resultat de reference")
     args = parseur.parse_args()
+    # Les mesures ne tracent pas : 63 questions par execution rempliraient le
+    # projet Langfuse, et le temps d'envoi fausserait la latence mesuree.
+    desactiver_traces()
     configurer_boucle()
     try:
         asyncio.run(principal(args.nom, args.strategie, args.comparer))
