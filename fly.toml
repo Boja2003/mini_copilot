@@ -10,6 +10,12 @@ primary_region = "cdg"  # Paris
 [env]
   MISTRAL_MODEL = "ministral-8b-latest"
   MISTRAL_BASE_URL = "https://api.mistral.ai/v1"
+  # Reecriture de requete activee apres mesure (eval/resultats/, commit
+  # e080f3f) : +0.09 de MRR, les deux echecs en francais corriges. Le 3b
+  # plutot que le 8b : qualite equivalente, ~230 ms plus rapide, et un quota
+  # de 750 req/min au lieu de 188.
+  REECRITURE_REQUETES = "true"
+  MISTRAL_REECRITURE_MODEL = "ministral-3b-latest"
   # Les SECRETS ne sont jamais ici : ce fichier est versionne.
   # Ils passent par `fly secrets set` (voir le README).
 
