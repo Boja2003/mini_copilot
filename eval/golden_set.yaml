@@ -1,0 +1,336 @@
+# Golden set : les questions de reference pour mesurer le retrieval.
+#
+# Chaque question dit ou se trouve la reponse. Les documents et les pages ont
+# ete etiquetes en lisant le texte extrait du corpus, JAMAIS avec notre propre
+# retrieval : etiqueter avec le systeme qu'on evalue rendrait la mesure
+# circulaire.
+#
+# Tout le corpus est en anglais. Les categories isolent donc l'effet de la
+# langue :
+#   fr_proche   question en francais, le terme cle ressemble a l'anglais
+#               (Dijkstra, hypothese/hypothesis, convexe/convex)
+#   fr_eloigne  question en francais, le terme cle ne ressemble pas a
+#               l'anglais (parcours en largeur / breadth-first search)
+#   en          groupe temoin : questions en anglais
+#   hors_sujet  rien a trouver ; sert a l'evaluation de la generation
+#
+# `paire` relie une question francaise a la meme question posee en anglais :
+# l'ecart entre les deux mesure la langue, toutes choses egales par ailleurs.
+#
+# `pages` n'est renseigne que lorsque l'emplacement a ete verifie dans le
+# texte. En cas de doute, seul le document est attendu.
+#
+# BIAIS A CONNAITRE : ce golden set a ete redige par celui qui construit le
+# systeme. Il doit etre relu et enrichi par quelqu'un qui connait les cours :
+# ce sont tes vraies questions de revision qui comptent.
+
+# --- Theorie des graphes ----------------------------------------------------
+
+- id: bfs-fr
+  question: "Comment fonctionne le parcours en largeur d'un graphe ?"
+  categorie: fr_eloigne
+  paire: bfs-en
+  documents: ["III. Breadth first search"]
+  pages: {"III. Breadth first search": [1, 2, 3]}
+
+- id: bfs-file-fr
+  question: "Quelle structure de données utilise-t-on pour un parcours en largeur ?"
+  categorie: fr_eloigne
+  documents: ["III. Breadth first search"]
+  pages: {"III. Breadth first search": [1, 2]}
+
+- id: dfs-fr
+  question: "Explique le parcours en profondeur d'un graphe."
+  categorie: fr_eloigne
+  documents: ["IV. Depth first search"]
+  pages: {"IV. Depth first search": [1, 2]}
+
+- id: dfs-pile-fr
+  question: "Pourquoi le parcours en profondeur utilise-t-il une pile ?"
+  categorie: fr_eloigne
+  documents: ["IV. Depth first search"]
+  pages: {"IV. Depth first search": [1, 3, 4]}
+
+- id: largeur-vs-profondeur-fr
+  question: "Quelle est la différence entre le parcours en largeur et le parcours en profondeur ?"
+  categorie: fr_eloigne
+  documents: ["III. Breadth first search", "IV. Depth first search"]
+  pages: {"III. Breadth first search": [1], "IV. Depth first search": [1]}
+
+- id: cycles-fr
+  question: "Comment savoir si un graphe orienté contient un cycle ?"
+  categorie: fr_proche
+  documents: ["II. Detecting cycles"]
+  pages: {"II. Detecting cycles": [1, 2, 3]}
+
+- id: rang-fr
+  question: "Comment calcule-t-on le rang d'un sommet dans un graphe sans circuit ?"
+  categorie: fr_eloigne
+  documents: ["V. Ranks"]
+  pages: {"V. Ranks": [1, 2, 3, 4]}
+
+- id: ordo-date-fr
+  question: "Comment déterminer la date au plus tôt de début d'une tâche dans un ordonnancement ?"
+  categorie: fr_eloigne
+  paire: scheduling-en
+  documents: ["VI. Scheduling"]
+  pages: {"VI. Scheduling": [6]}
+
+- id: ordo-longs-chemins-fr
+  question: "Pourquoi l'ordonnancement d'un projet revient-il à chercher des plus longs chemins ?"
+  categorie: fr_eloigne
+  documents: ["VI. Scheduling"]
+  pages: {"VI. Scheduling": [1, 2]}
+
+- id: dijkstra-fr
+  question: "Comment fonctionne l'algorithme de Dijkstra ?"
+  categorie: fr_proche
+  documents: ["VII. Shortest paths"]
+  pages: {"VII. Shortest paths": [9, 10, 11]}
+
+- id: dijkstra-negatif-fr
+  question: "Pourquoi ne peut-on pas utiliser Dijkstra quand certains arcs ont un poids négatif ?"
+  categorie: fr_proche
+  documents: ["VII. Shortest paths"]
+  pages: {"VII. Shortest paths": [10, 38, 39]}
+
+- id: bellman-fr
+  question: "À quoi sert l'algorithme de Bellman ?"
+  categorie: fr_proche
+  documents: ["VII. Shortest paths"]
+  pages: {"VII. Shortest paths": [38, 39]}
+
+- id: floyd-fr
+  question: "Explique l'algorithme de Floyd-Warshall."
+  categorie: fr_proche
+  documents: ["VII. Shortest paths"]
+  pages: {"VII. Shortest paths": [52, 53]}
+
+- id: plus-courts-chemins-fr
+  question: "Quels algorithmes permettent de trouver les plus courts chemins dans un graphe ?"
+  categorie: fr_eloigne
+  documents: ["VII. Shortest paths"]
+
+- id: kruskal-fr
+  question: "Comment fonctionne l'algorithme de Kruskal ?"
+  categorie: fr_proche
+  documents: ["VIII. Trees and graphs"]
+  pages: {"VIII. Trees and graphs": [9, 10]}
+
+- id: arbre-couvrant-fr
+  question: "Qu'est-ce qu'un arbre couvrant de poids minimal et à quoi sert-il ?"
+  categorie: fr_eloigne
+  paire: mst-en
+  documents: ["VIII. Trees and graphs"]
+  pages: {"VIII. Trees and graphs": [7, 8]}
+
+- id: arbre-foret-fr
+  question: "Quelle est la définition d'un arbre en théorie des graphes, et celle d'une forêt ?"
+  categorie: fr_eloigne
+  documents: ["VIII. Trees and graphs"]
+  pages: {"VIII. Trees and graphs": [3]}
+
+- id: welsh-powell-fr
+  question: "Quelles sont les étapes de l'algorithme de Welsh & Powell ?"
+  categorie: fr_proche
+  documents: ["IX Coloring"]
+  pages: {"IX Coloring": [4, 5]}
+
+- id: nombre-chromatique-fr
+  question: "Qu'est-ce que le nombre chromatique d'un graphe ?"
+  categorie: fr_proche
+  documents: ["IX Coloring"]
+  pages: {"IX Coloring": [2]}
+
+- id: coloration-glouton-fr
+  question: "Un algorithme glouton de coloration donne-t-il toujours une solution optimale ?"
+  categorie: fr_eloigne
+  documents: ["IX Coloring"]
+  pages: {"IX Coloring": [9, 10]}
+
+- id: matrice-adjacence-fr
+  question: "Comment construire la matrice d'adjacence d'un graphe orienté ?"
+  categorie: fr_proche
+  documents: ["I. Generalities"]
+  pages: {"I. Generalities": [39, 40]}
+
+- id: degres-fr
+  question: "Quelle est la différence entre le degré entrant et le degré sortant d'un sommet ?"
+  categorie: fr_eloigne
+  documents: ["I. Generalities"]
+  pages: {"I. Generalities": [34, 35]}
+
+- id: fortement-connexe-fr
+  question: "Qu'est-ce qu'une composante fortement connexe ?"
+  categorie: fr_eloigne
+  documents: ["I. Generalities"]
+  pages: {"I. Generalities": [32, 33]}
+
+- id: eulerien-fr
+  question: "Qu'est-ce qu'un graphe eulérien, et quel est le lien avec les ponts de Königsberg ?"
+  categorie: fr_proche
+  documents: ["I. Generalities"]
+  pages: {"I. Generalities": [49, 50, 51]}
+
+# --- Statistiques -----------------------------------------------------------
+
+- id: test-hypothese-fr
+  question: "Quel est le principe d'un test d'hypothèse ?"
+  categorie: fr_proche
+  documents: ["Chapter 4 -Inferential Statistics"]
+  pages: {"Chapter 4 -Inferential Statistics": [1, 2, 3]}
+
+- id: risques-fr
+  question: "Que représentent le risque de première espèce et le risque de deuxième espèce ?"
+  categorie: fr_eloigne
+  documents: ["Chapter 4 -Inferential Statistics"]
+  pages: {"Chapter 4 -Inferential Statistics": [3, 4]}
+
+- id: khi-deux-fr
+  question: "Comment réaliser un test du khi-deux d'indépendance ?"
+  categorie: fr_eloigne
+  paire: chi2-en
+  documents: ["Chapter 4 -Inferential Statistics"]
+  pages: {"Chapter 4 -Inferential Statistics": [15, 16]}
+
+- id: student-fr
+  question: "Quand utilise-t-on la loi de Student ?"
+  categorie: fr_proche
+  documents: ["Chapter 4 -Inferential Statistics", "Chapter 3- Estimation with Intervals"]
+  pages: {"Chapter 4 -Inferential Statistics": [11, 12]}
+
+- id: intervalle-confiance-fr
+  question: "Comment construire un intervalle de confiance pour une moyenne ?"
+  categorie: fr_proche
+  documents: ["Chapter 3- Estimation with Intervals"]
+
+- id: estimateur-biais-fr
+  question: "Qu'est-ce qu'un estimateur sans biais ?"
+  categorie: fr_proche
+  documents: ["Chapter 3- Estimation with Intervals"]
+  pages: {"Chapter 3- Estimation with Intervals": [8, 9, 10]}
+
+- id: acp-fr
+  question: "À quoi sert l'analyse en composantes principales ?"
+  categorie: fr_proche
+  documents: ["Chapter 2- Principal Component Analysis"]
+  pages: {"Chapter 2- Principal Component Analysis": [1]}
+
+- id: valeurs-propres-fr
+  question: "Quel est le rôle des valeurs propres dans l'ACP ?"
+  categorie: fr_eloigne
+  paire: eigen-en
+  documents: ["Chapter 2- Principal Component Analysis"]
+  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6]}
+
+- id: cercle-correlations-fr
+  question: "Comment interpréter un cercle des corrélations ?"
+  categorie: fr_proche
+  documents: ["Chapter 2- Principal Component Analysis"]
+  pages: {"Chapter 2- Principal Component Analysis": [16]}
+
+- id: regression-fr
+  question: "Comment calculer la droite de régression par la méthode des moindres carrés ?"
+  categorie: fr_proche
+  documents: ["ST2DA-Chapter 1-2025-2026"]
+  pages: {"ST2DA-Chapter 1-2025-2026": [18, 19]}
+
+- id: mediane-fr
+  question: "Comment calcule-t-on la médiane d'une série quand l'effectif est pair ?"
+  categorie: fr_proche
+  documents: ["ST2DA-Chapter 1-2025-2026"]
+  pages: {"ST2DA-Chapter 1-2025-2026": [6, 7]}
+
+- id: ecart-type-fr
+  question: "Que mesure l'écart-type ?"
+  categorie: fr_eloigne
+  paire: sd-en
+  documents: ["ST2DA-Chapter 1-2025-2026"]
+  pages: {"ST2DA-Chapter 1-2025-2026": [8, 9]}
+
+# --- Optimisation convexe ---------------------------------------------------
+
+- id: ensemble-convexe-fr
+  question: "Quelle est la définition d'un ensemble convexe ?"
+  categorie: fr_proche
+  documents: ["Convex_optimization2026FINALVERSION"]
+  pages: {"Convex_optimization2026FINALVERSION": [5, 6]}
+
+- id: kkt-fr
+  question: "Qu'énonce le théorème de Karush-Kuhn-Tucker ?"
+  categorie: fr_proche
+  documents: ["Convex_optimization2026FINALVERSION"]
+  pages: {"Convex_optimization2026FINALVERSION": [24, 25]}
+
+- id: fortement-convexe-fr
+  question: "Qu'est-ce qu'une fonction fortement convexe ?"
+  categorie: fr_proche
+  documents: ["Convex_optimization2026FINALVERSION"]
+  pages: {"Convex_optimization2026FINALVERSION": [10, 11, 15]}
+
+- id: lagrangien-fr
+  question: "Qu'est-ce que le lagrangien d'un problème d'optimisation sous contraintes ?"
+  categorie: fr_proche
+  documents: ["Convex_optimization2026FINALVERSION"]
+  pages: {"Convex_optimization2026FINALVERSION": [23, 24]}
+
+# --- Groupe temoin en anglais -------------------------------------------------
+
+- id: bfs-en
+  question: "How does breadth-first search work?"
+  categorie: en
+  documents: ["III. Breadth first search"]
+  pages: {"III. Breadth first search": [1, 2, 3]}
+
+- id: mst-en
+  question: "What is a minimum spanning tree and what is it used for?"
+  categorie: en
+  documents: ["VIII. Trees and graphs"]
+  pages: {"VIII. Trees and graphs": [7, 8]}
+
+- id: chi2-en
+  question: "How do you perform a chi-square test of independence?"
+  categorie: en
+  documents: ["Chapter 4 -Inferential Statistics"]
+  pages: {"Chapter 4 -Inferential Statistics": [15, 16]}
+
+- id: eigen-en
+  question: "What is the role of eigenvalues in PCA?"
+  categorie: en
+  documents: ["Chapter 2- Principal Component Analysis"]
+  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6]}
+
+- id: scheduling-en
+  question: "How do you determine the earliest start date of a task in project scheduling?"
+  categorie: en
+  documents: ["VI. Scheduling"]
+  pages: {"VI. Scheduling": [6]}
+
+- id: sd-en
+  question: "What does the standard deviation measure?"
+  categorie: en
+  documents: ["ST2DA-Chapter 1-2025-2026"]
+  pages: {"ST2DA-Chapter 1-2025-2026": [8, 9]}
+
+# --- Hors sujet ---------------------------------------------------------------
+
+- id: hs-tarte
+  question: "Quelle est la recette de la tarte aux pommes ?"
+  categorie: hors_sujet
+
+- id: hs-football
+  question: "Qui a gagné la Coupe du monde de football 2018 ?"
+  categorie: hors_sujet
+
+- id: hs-robinet
+  question: "Comment réparer un robinet qui fuit ?"
+  categorie: hors_sujet
+
+- id: hs-grippe
+  question: "Quels sont les symptômes de la grippe ?"
+  categorie: hors_sujet
+
+# Piege volontaire : technique et plausible, mais absent des cours.
+- id: hs-pip
+  question: "Comment installer une bibliothèque Python avec pip ?"
+  categorie: hors_sujet
