@@ -1,0 +1,2675 @@
+{
+  "nom": "reecriture-3b-r3",
+  "strategie": "reecriture",
+  "date": "2026-09-15T10:00:02+00:00",
+  "commit": "0649b60",
+  "golden_set": "7be5592d2ef6",
+  "parametres": {
+    "k": 5,
+    "nb_candidats": 25,
+    "k_rrf": 60,
+    "distance_maximale": 0.35,
+    "modele_reecriture": "ministral-3b-latest",
+    "modele_embeddings": "mistral-embed"
+  },
+  "latence_ms": {
+    "mediane": 1113,
+    "p90": 1850
+  },
+  "agregats": {
+    "TOUTES": {
+      "n": 58,
+      "hit@5": 1.0,
+      "mrr": 0.991,
+      "precision@5": 0.914,
+      "hit_page@5": 0.964
+    },
+    "en": {
+      "n": 7,
+      "hit@5": 1.0,
+      "mrr": 1.0,
+      "precision@5": 0.943,
+      "hit_page@5": 1.0
+    },
+    "fr_eloigne": {
+      "n": 20,
+      "hit@5": 1.0,
+      "mrr": 0.975,
+      "precision@5": 0.87,
+      "hit_page@5": 1.0
+    },
+    "fr_proche": {
+      "n": 31,
+      "hit@5": 1.0,
+      "mrr": 1.0,
+      "precision@5": 0.935,
+      "hit_page@5": 0.933
+    }
+  },
+  "questions": [
+    {
+      "id": "bfs-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment fonctionne le parcours en largeur d'un graphe ?",
+      "duree_ms": 1334,
+      "requetes": [
+        "Comment fonctionne le parcours en largeur d'un graphe ?",
+        "breadth-first search (BFS) algorithm implementation in graph theory",
+        "BFS queue data structure and traversal order in undirected graphs"
+      ],
+      "renvoyes": [
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1074
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 5,
+          "distance": 0.1392
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 13,
+          "distance": 0.1565
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.1706
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 18,
+          "distance": 0.1929
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "bfs-file-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quelle structure de données utilise-t-on pour un parcours en largeur ?",
+      "duree_ms": 945,
+      "requetes": [
+        "Quelle structure de données utilise-t-on pour un parcours en largeur ?",
+        "Breadth-First Search (BFS) data structures",
+        "queue data structure implementation in graph traversal algorithms"
+      ],
+      "renvoyes": [
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1091
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 2,
+          "distance": 0.1579
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 5,
+          "distance": 0.1645
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 7,
+          "distance": 0.1659
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.1569
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "dfs-fr",
+      "categorie": "fr_eloigne",
+      "question": "Explique le parcours en profondeur d'un graphe.",
+      "duree_ms": 925,
+      "requetes": [
+        "Explique le parcours en profondeur d'un graphe.",
+        "depth-first search (DFS) algorithm implementation in graph theory",
+        "iterative deepening depth-first search (IDDFS) algorithm for graph traversal"
+      ],
+      "renvoyes": [
+        {
+          "document": "IV. Depth first search",
+          "page": 1,
+          "distance": 0.133
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 2,
+          "distance": 0.1718
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1815
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.2191
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 18,
+          "distance": 0.1981
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "dfs-pile-fr",
+      "categorie": "fr_eloigne",
+      "question": "Pourquoi le parcours en profondeur utilise-t-il une pile ?",
+      "duree_ms": 1254,
+      "requetes": [
+        "Pourquoi le parcours en profondeur utilise-t-il une pile ?",
+        "depth-first search (DFS) stack implementation",
+        "iterative depth-first search (DFS) using a stack data structure"
+      ],
+      "renvoyes": [
+        {
+          "document": "IV. Depth first search",
+          "page": 1,
+          "distance": 0.1237
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 2,
+          "distance": 0.1988
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 4,
+          "distance": 0.2185
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 8,
+          "distance": 0.2233
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 7,
+          "distance": 0.2246
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "largeur-vs-profondeur-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quelle est la différence entre le parcours en largeur et le parcours en profondeur ?",
+      "duree_ms": 964,
+      "requetes": [
+        "Quelle est la différence entre le parcours en largeur et le parcours en profondeur ?",
+        "breadth-first search (BFS) vs depth-first search (DFS) algorithms",
+        "time and space complexity comparison: BFS vs DFS in graph traversal"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.2178
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 18,
+          "distance": 0.2169
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 35,
+          "distance": 0.2255
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1138
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 1,
+          "distance": 0.1326
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 0.5,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "cycles-fr",
+      "categorie": "fr_proche",
+      "question": "Comment savoir si un graphe orienté contient un cycle ?",
+      "duree_ms": 1172,
+      "requetes": [
+        "Comment savoir si un graphe orienté contient un cycle ?",
+        "directed graph cycle detection algorithms",
+        "cycle detection in directed graphs using DFS (Depth-First Search)"
+      ],
+      "renvoyes": [
+        {
+          "document": "II. Detecting cycles",
+          "page": 1,
+          "distance": 0.1317
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 3,
+          "distance": 0.1643
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 2,
+          "distance": 0.1757
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 2,
+          "distance": 0.1596
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.2101
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "rang-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment calcule-t-on le rang d'un sommet dans un graphe sans circuit ?",
+      "duree_ms": 1122,
+      "requetes": [
+        "Comment calcule-t-on le rang d'un sommet dans un graphe sans circuit ?",
+        "topological sorting algorithm for directed acyclic graphs (DAG)",
+        "topological rank calculation in directed graphs without cycles"
+      ],
+      "renvoyes": [
+        {
+          "document": "V. Ranks",
+          "page": 19,
+          "distance": 0.1557
+        },
+        {
+          "document": "V. Ranks",
+          "page": 2,
+          "distance": 0.1759
+        },
+        {
+          "document": "V. Ranks",
+          "page": 11,
+          "distance": 0.1942
+        },
+        {
+          "document": "V. Ranks",
+          "page": 17,
+          "distance": 0.194
+        },
+        {
+          "document": "V. Ranks",
+          "page": 10,
+          "distance": 0.1848
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "ordo-date-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment déterminer la date au plus tôt de début d'une tâche dans un ordonnancement ?",
+      "duree_ms": 1082,
+      "requetes": [
+        "Comment déterminer la date au plus tôt de début d'une tâche dans un ordonnancement ?",
+        "earliest start time calculation in project scheduling",
+        "critical path method earliest event times"
+      ],
+      "renvoyes": [
+        {
+          "document": "VI. Scheduling",
+          "page": 6,
+          "distance": 0.1878
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 7,
+          "distance": 0.1888
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 11,
+          "distance": 0.1975
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.1976
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 12,
+          "distance": 0.1929
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "ordo-longs-chemins-fr",
+      "categorie": "fr_eloigne",
+      "question": "Pourquoi l'ordonnancement d'un projet revient-il à chercher des plus longs chemins ?",
+      "duree_ms": 2283,
+      "requetes": [
+        "Pourquoi l'ordonnancement d'un projet revient-il à chercher des plus longs chemins ?",
+        "project scheduling critical path method",
+        "critical path analysis longest path identification in PERT networks"
+      ],
+      "renvoyes": [
+        {
+          "document": "VI. Scheduling",
+          "page": 6,
+          "distance": 0.1853
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 1,
+          "distance": 0.1743
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 14,
+          "distance": 0.2262
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.2263
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 7,
+          "distance": 0.2211
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "dijkstra-fr",
+      "categorie": "fr_proche",
+      "question": "Comment fonctionne l'algorithme de Dijkstra ?",
+      "duree_ms": 1023,
+      "requetes": [
+        "Comment fonctionne l'algorithme de Dijkstra ?",
+        "Dijkstra's algorithm implementation for shortest path in weighted graphs",
+        "Dijkstra's algorithm pseudocode with priority queue optimization"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.1331
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 31,
+          "distance": 0.1514
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 30,
+          "distance": 0.1474
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 35,
+          "distance": 0.1561
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 11,
+          "distance": 0.1616
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "dijkstra-negatif-fr",
+      "categorie": "fr_proche",
+      "question": "Pourquoi ne peut-on pas utiliser Dijkstra quand certains arcs ont un poids négatif ?",
+      "duree_ms": 1066,
+      "requetes": [
+        "Pourquoi ne peut-on pas utiliser Dijkstra quand certains arcs ont un poids négatif ?",
+        "Dijkstra's algorithm limitations with negative edge weights",
+        "Bellman-Ford algorithm vs. Dijkstra's algorithm for negative weight graphs"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 38,
+          "distance": 0.1298
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 39,
+          "distance": 0.1268
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.1504
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.1648
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 40,
+          "distance": 0.1417
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "bellman-fr",
+      "categorie": "fr_proche",
+      "question": "À quoi sert l'algorithme de Bellman ?",
+      "duree_ms": 932,
+      "requetes": [
+        "À quoi sert l'algorithme de Bellman ?",
+        "Bellman-Ford algorithm applications in graph theory",
+        "Bellman-Ford algorithm implementation for shortest path verification"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 43,
+          "distance": 0.1363
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 42,
+          "distance": 0.1377
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 39,
+          "distance": 0.1396
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 44,
+          "distance": 0.1365
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 41,
+          "distance": 0.1388
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "floyd-fr",
+      "categorie": "fr_proche",
+      "question": "Explique l'algorithme de Floyd-Warshall.",
+      "duree_ms": 1021,
+      "requetes": [
+        "Explique l'algorithme de Floyd-Warshall.",
+        "Floyd-Warshall algorithm implementation in graph theory",
+        "dynamic programming approach for all-pairs shortest paths (Floyd-Warshall)"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 53,
+          "distance": 0.1088
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 52,
+          "distance": 0.1523
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 57,
+          "distance": 0.153
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 56,
+          "distance": 0.1623
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 58,
+          "distance": 0.1652
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "plus-courts-chemins-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quels algorithmes permettent de trouver les plus courts chemins dans un graphe ?",
+      "duree_ms": 1352,
+      "requetes": [
+        "Quels algorithmes permettent de trouver les plus courts chemins dans un graphe ?",
+        "shortest path algorithms in graph theory",
+        "Dijkstra's algorithm implementation examples"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.18
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 35,
+          "distance": 0.1971
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.1591
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 8,
+          "distance": 0.1763
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 52,
+          "distance": 0.1818
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0
+    },
+    {
+      "id": "kruskal-fr",
+      "categorie": "fr_proche",
+      "question": "Comment fonctionne l'algorithme de Kruskal ?",
+      "duree_ms": 899,
+      "requetes": [
+        "Comment fonctionne l'algorithme de Kruskal ?",
+        "Kruskal's algorithm minimum spanning tree implementation",
+        "Kruskal's algorithm greedy algorithm for graph theory"
+      ],
+      "renvoyes": [
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 9,
+          "distance": 0.1128
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 17,
+          "distance": 0.1147
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 18,
+          "distance": 0.1546
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 21,
+          "distance": 0.1555
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 20,
+          "distance": 0.1562
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "arbre-couvrant-fr",
+      "categorie": "fr_eloigne",
+      "question": "Qu'est-ce qu'un arbre couvrant de poids minimal et à quoi sert-il ?",
+      "duree_ms": 768,
+      "requetes": [
+        "Qu'est-ce qu'un arbre couvrant de poids minimal et à quoi sert-il ?",
+        "minimum spanning tree (MST) definition",
+        "Kruskal's algorithm for minimum spanning tree"
+      ],
+      "renvoyes": [
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 17,
+          "distance": 0.1003
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 9,
+          "distance": 0.1023
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 8,
+          "distance": 0.1752
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 29,
+          "distance": 0.1665
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 25,
+          "distance": 0.1561
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "arbre-foret-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quelle est la définition d'un arbre en théorie des graphes, et celle d'une forêt ?",
+      "duree_ms": 1269,
+      "requetes": [
+        "Quelle est la définition d'un arbre en théorie des graphes, et celle d'une forêt ?",
+        "tree (graph theory) definition",
+        "forest (graph theory) definition"
+      ],
+      "renvoyes": [
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 3,
+          "distance": 0.1489
+        },
+        {
+          "document": "I. Generalities",
+          "page": 3,
+          "distance": 0.2156
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 4,
+          "distance": 0.1819
+        },
+        {
+          "document": "I. Generalities",
+          "page": 9,
+          "distance": 0.2311
+        },
+        {
+          "document": "I. Generalities",
+          "page": 2,
+          "distance": 0.2325
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.4,
+      "hit_page": 1.0
+    },
+    {
+      "id": "welsh-powell-fr",
+      "categorie": "fr_proche",
+      "question": "Quelles sont les étapes de l'algorithme de Welsh & Powell ?",
+      "duree_ms": 1189,
+      "requetes": [
+        "Quelles sont les étapes de l'algorithme de Welsh & Powell ?",
+        "Welsh and Powell clustering algorithm steps",
+        "iterative hierarchical clustering Welsh and Powell algorithm implementation details"
+      ],
+      "renvoyes": [
+        {
+          "document": "IX Coloring",
+          "page": 4,
+          "distance": 0.1462
+        },
+        {
+          "document": "IX Coloring",
+          "page": 10,
+          "distance": 0.1633
+        },
+        {
+          "document": "IX Coloring",
+          "page": 9,
+          "distance": 0.1717
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 77,
+          "distance": 0.2233
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 132,
+          "distance": 0.2206
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "nombre-chromatique-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce que le nombre chromatique d'un graphe ?",
+      "duree_ms": 740,
+      "requetes": [
+        "Qu'est-ce que le nombre chromatique d'un graphe ?",
+        "graph coloring chromatic number definition",
+        "chromatic number of a graph NP-hard problem literature"
+      ],
+      "renvoyes": [
+        {
+          "document": "IX Coloring",
+          "page": 2,
+          "distance": 0.1416
+        },
+        {
+          "document": "IX Coloring",
+          "page": 3,
+          "distance": 0.1997
+        },
+        {
+          "document": "IX Coloring",
+          "page": 4,
+          "distance": 0.2219
+        },
+        {
+          "document": "IX Coloring",
+          "page": 5,
+          "distance": 0.2189
+        },
+        {
+          "document": "IX Coloring",
+          "page": 7,
+          "distance": 0.2445
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "coloration-glouton-fr",
+      "categorie": "fr_eloigne",
+      "question": "Un algorithme glouton de coloration donne-t-il toujours une solution optimale ?",
+      "duree_ms": 1108,
+      "requetes": [
+        "Un algorithme glouton de coloration donne-t-il toujours une solution optimale ?",
+        "greedy graph coloring algorithm optimality conditions",
+        "greedy coloring algorithm vs optimal k-coloring proof counterexamples"
+      ],
+      "renvoyes": [
+        {
+          "document": "IX Coloring",
+          "page": 12,
+          "distance": 0.1809
+        },
+        {
+          "document": "IX Coloring",
+          "page": 4,
+          "distance": 0.187
+        },
+        {
+          "document": "IX Coloring",
+          "page": 9,
+          "distance": 0.2007
+        },
+        {
+          "document": "IX Coloring",
+          "page": 11,
+          "distance": 0.205
+        },
+        {
+          "document": "IX Coloring",
+          "page": 3,
+          "distance": 0.2115
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "matrice-adjacence-fr",
+      "categorie": "fr_proche",
+      "question": "Comment construire la matrice d'adjacence d'un graphe orienté ?",
+      "duree_ms": 892,
+      "requetes": [
+        "Comment construire la matrice d'adjacence d'un graphe orienté ?",
+        "adjacency matrix construction for directed graph",
+        "how to represent directed graph edges in adjacency matrix format"
+      ],
+      "renvoyes": [
+        {
+          "document": "I. Generalities",
+          "page": 40,
+          "distance": 0.1414
+        },
+        {
+          "document": "I. Generalities",
+          "page": 39,
+          "distance": 0.1591
+        },
+        {
+          "document": "I. Generalities",
+          "page": 43,
+          "distance": 0.1948
+        },
+        {
+          "document": "I. Generalities",
+          "page": 45,
+          "distance": 0.2025
+        },
+        {
+          "document": "I. Generalities",
+          "page": 42,
+          "distance": 0.1969
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "degres-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quelle est la différence entre le degré entrant et le degré sortant d'un sommet ?",
+      "duree_ms": 1064,
+      "requetes": [
+        "Quelle est la différence entre le degré entrant et le degré sortant d'un sommet ?",
+        "in-degree vs out-degree in graph theory (vertex degree definitions)",
+        "out-degree of a node in directed graph terminology vs in-degree"
+      ],
+      "renvoyes": [
+        {
+          "document": "I. Generalities",
+          "page": 34,
+          "distance": 0.1263
+        },
+        {
+          "document": "I. Generalities",
+          "page": 42,
+          "distance": 0.1525
+        },
+        {
+          "document": "I. Generalities",
+          "page": 35,
+          "distance": 0.1645
+        },
+        {
+          "document": "I. Generalities",
+          "page": 37,
+          "distance": 0.1879
+        },
+        {
+          "document": "I. Generalities",
+          "page": 41,
+          "distance": 0.1909
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "fortement-connexe-fr",
+      "categorie": "fr_eloigne",
+      "question": "Qu'est-ce qu'une composante fortement connexe ?",
+      "duree_ms": 1005,
+      "requetes": [
+        "Qu'est-ce qu'une composante fortement connexe ?",
+        "strongly connected component (SCC) in graph theory",
+        "strongly connected components (DAG representation in algorithms)"
+      ],
+      "renvoyes": [
+        {
+          "document": "I. Generalities",
+          "page": 33,
+          "distance": 0.175
+        },
+        {
+          "document": "I. Generalities",
+          "page": 32,
+          "distance": 0.2236
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 33,
+          "distance": 0.2386
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 36,
+          "distance": 0.2396
+        },
+        {
+          "document": "IX Coloring",
+          "page": 7,
+          "distance": 0.235
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.4,
+      "hit_page": 1.0
+    },
+    {
+      "id": "eulerien-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce qu'un graphe eulérien, et quel est le lien avec les ponts de Königsberg ?",
+      "duree_ms": 969,
+      "requetes": [
+        "Qu'est-ce qu'un graphe eulérien, et quel est le lien avec les ponts de Königsberg ?",
+        "Eulerian graph definition and properties",
+        "Eulerian circuit in graph theory and Königsberg bridges problem"
+      ],
+      "renvoyes": [
+        {
+          "document": "I. Generalities",
+          "page": 51,
+          "distance": 0.1112
+        },
+        {
+          "document": "I. Generalities",
+          "page": 50,
+          "distance": 0.1162
+        },
+        {
+          "document": "I. Generalities",
+          "page": 52,
+          "distance": 0.1406
+        },
+        {
+          "document": "I. Generalities",
+          "page": 53,
+          "distance": 0.1817
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 3,
+          "distance": 0.1964
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "test-hypothese-fr",
+      "categorie": "fr_proche",
+      "question": "Quel est le principe d'un test d'hypothèse ?",
+      "duree_ms": 1287,
+      "requetes": [
+        "Quel est le principe d'un test d'hypothèse ?",
+        "hypothesis testing statistical principles",
+        "null hypothesis significance testing (HSST) framework"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 2,
+          "distance": 0.1418
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 4,
+          "distance": 0.1732
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 6,
+          "distance": 0.1809
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 4,
+          "distance": 0.1557
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 5,
+          "distance": 0.1779
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "risques-fr",
+      "categorie": "fr_eloigne",
+      "question": "Que représentent le risque de première espèce et le risque de deuxième espèce ?",
+      "duree_ms": 871,
+      "requetes": [
+        "Que représentent le risque de première espèce et le risque de deuxième espèce ?",
+        "Type I error definition in hypothesis testing",
+        "Type II error definition in hypothesis testing"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 3,
+          "distance": 0.1555
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 4,
+          "distance": 0.1762
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 2,
+          "distance": 0.1883
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 2,
+          "distance": 0.1915
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 8,
+          "distance": 0.2058
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "khi-deux-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment réaliser un test du khi-deux d'indépendance ?",
+      "duree_ms": 1036,
+      "requetes": [
+        "Comment réaliser un test du khi-deux d'indépendance ?",
+        "chi-square independence test implementation in Python (statistical hypothesis testing)",
+        "how to perform chi-square test for independence in R (categorical data analysis, contingency tables)"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1389
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.1527
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1619
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 16,
+          "distance": 0.1756
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.1872
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "student-fr",
+      "categorie": "fr_proche",
+      "question": "Quand utilise-t-on la loi de Student ?",
+      "duree_ms": 1715,
+      "requetes": [
+        "Quand utilise-t-on la loi de Student ?",
+        "Student's t-distribution statistical tests for small sample sizes",
+        "Student's t-test assumptions and applications in hypothesis testing for means"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 11,
+          "distance": 0.1523
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 12,
+          "distance": 0.1581
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 11,
+          "distance": 0.1608
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 22,
+          "distance": 0.1714
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 13,
+          "distance": 0.1809
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "intervalle-confiance-fr",
+      "categorie": "fr_proche",
+      "question": "Comment construire un intervalle de confiance pour une moyenne ?",
+      "duree_ms": 1173,
+      "requetes": [
+        "Comment construire un intervalle de confiance pour une moyenne ?",
+        "confidence interval for sample mean estimation",
+        "t-distribution-based confidence interval for population mean (small sample size)"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.1454
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 14,
+          "distance": 0.1704
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 12,
+          "distance": 0.1831
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 10,
+          "distance": 0.1578
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 14,
+          "distance": 0.1434
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0
+    },
+    {
+      "id": "estimateur-biais-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce qu'un estimateur sans biais ?",
+      "duree_ms": 1551,
+      "requetes": [
+        "Qu'est-ce qu'un estimateur sans biais ?",
+        "unbiased estimator in statistical inference",
+        "properties of unbiased estimators in hypothesis testing and confidence intervals"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 9,
+          "distance": 0.1778
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 8,
+          "distance": 0.2116
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 8,
+          "distance": 0.1847
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 10,
+          "distance": 0.2157
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 9,
+          "distance": 0.2297
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "acp-fr",
+      "categorie": "fr_proche",
+      "question": "À quoi sert l'analyse en composantes principales ?",
+      "duree_ms": 1155,
+      "requetes": [
+        "À quoi sert l'analyse en composantes principales ?",
+        "principal component analysis (PCA) applications in multivariate statistical analysis",
+        "PCA dimensionality reduction techniques for data compression and noise reduction"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 1,
+          "distance": 0.1488
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 7,
+          "distance": 0.183
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.1678
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 7,
+          "distance": 0.1808
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 2,
+          "distance": 0.1926
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "valeurs-propres-fr",
+      "categorie": "fr_eloigne",
+      "question": "Quel est le rôle des valeurs propres dans l'ACP ?",
+      "duree_ms": 1067,
+      "requetes": [
+        "Quel est le rôle des valeurs propres dans l'ACP ?",
+        "principal component analysis (PCA) eigenvalues significance",
+        "PCA eigenvectors interpretation and role in dimensionality reduction"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 6,
+          "distance": 0.1728
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.1839
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 7,
+          "distance": 0.1734
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 1,
+          "distance": 0.1753
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 11,
+          "distance": 0.1824
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "cercle-correlations-fr",
+      "categorie": "fr_proche",
+      "question": "Comment interpréter un cercle des corrélations ?",
+      "duree_ms": 942,
+      "requetes": [
+        "Comment interpréter un cercle des corrélations ?",
+        "correlation circle interpretation in principal component analysis (PCA) visualizations",
+        "how to interpret scatterplot matrix (correlation circle) for multivariate statistical analysis"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 16,
+          "distance": 0.1795
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 13,
+          "distance": 0.1921
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 10,
+          "distance": 0.1998
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 17,
+          "distance": 0.2021
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 2,
+          "distance": 0.1995
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "regression-fr",
+      "categorie": "fr_proche",
+      "question": "Comment calculer la droite de régression par la méthode des moindres carrés ?",
+      "duree_ms": 1133,
+      "requetes": [
+        "Comment calculer la droite de régression par la méthode des moindres carrés ?",
+        "least squares regression line",
+        "linear regression via least squares optimization (normal equations)"
+      ],
+      "renvoyes": [
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 18,
+          "distance": 0.171
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 21,
+          "distance": 0.173
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 22,
+          "distance": 0.1906
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 22,
+          "distance": 0.2025
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 24,
+          "distance": 0.1699
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "mediane-fr",
+      "categorie": "fr_proche",
+      "question": "Comment calcule-t-on la médiane d'une série quand l'effectif est pair ?",
+      "duree_ms": 1158,
+      "requetes": [
+        "Comment calcule-t-on la médiane d'une série quand l'effectif est pair ?",
+        "median calculation for even sample size",
+        "middle value determination in paired dataset statistics"
+      ],
+      "renvoyes": [
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 6,
+          "distance": 0.1866
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 6,
+          "distance": 0.1975
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 7,
+          "distance": 0.2073
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.2397
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 7,
+          "distance": 0.2407
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "ecart-type-fr",
+      "categorie": "fr_eloigne",
+      "question": "Que mesure l'écart-type ?",
+      "duree_ms": 934,
+      "requetes": [
+        "Que mesure l'écart-type ?",
+        "standard deviation in statistical distributions",
+        "measurement of variability in data sets (population and sample)"
+      ],
+      "renvoyes": [
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 9,
+          "distance": 0.2147
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.2196
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 8,
+          "distance": 0.2256
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 13,
+          "distance": 0.2365
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 5,
+          "distance": 0.241
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "ensemble-convexe-fr",
+      "categorie": "fr_proche",
+      "question": "Quelle est la définition d'un ensemble convexe ?",
+      "duree_ms": 1101,
+      "requetes": [
+        "Quelle est la définition d'un ensemble convexe ?",
+        "convex set definition in mathematical optimization",
+        "convex hull mathematical properties and examples"
+      ],
+      "renvoyes": [
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 5,
+          "distance": 0.1627
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 3,
+          "distance": 0.1751
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 7,
+          "distance": 0.2077
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 18,
+          "distance": 0.1795
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 6,
+          "distance": 0.2123
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.8,
+      "hit_page": 1.0
+    },
+    {
+      "id": "kkt-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'énonce le théorème de Karush-Kuhn-Tucker ?",
+      "duree_ms": 1102,
+      "requetes": [
+        "Qu'énonce le théorème de Karush-Kuhn-Tucker ?",
+        "Karush–Kuhn–Tucker (KKT) conditions for constrained optimization",
+        "KKT theory in nonlinear programming and convex optimization applications"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 7,
+          "distance": 0.1137
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 27,
+          "distance": 0.1066
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 25,
+          "distance": 0.1007
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 168,
+          "distance": 0.1135
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 26,
+          "distance": 0.1172
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "fortement-convexe-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce qu'une fonction fortement convexe ?",
+      "duree_ms": 3867,
+      "requetes": [
+        "Qu'est-ce qu'une fonction fortement convexe ?",
+        "strongly convex function definition and properties",
+        "strong convexity mathematical conditions and examples"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 52,
+          "distance": 0.1369
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 10,
+          "distance": 0.1687
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 11,
+          "distance": 0.1721
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 12,
+          "distance": 0.1986
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 52,
+          "distance": 0.1876
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "lagrangien-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce que le lagrangien d'un problème d'optimisation sous contraintes ?",
+      "duree_ms": 1898,
+      "requetes": [
+        "Qu'est-ce que le lagrangien d'un problème d'optimisation sous contraintes ?",
+        "Lagrangian function optimization with constraints",
+        "Lagrangian multipliers mathematical formulation for constrained optimization problems"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 201,
+          "distance": 0.1458
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 23,
+          "distance": 0.1483
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 175,
+          "distance": 0.1365
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 221,
+          "distance": 0.1494
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 224,
+          "distance": 0.1465
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "section-doree-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment fonctionne la méthode de la section dorée pour minimiser une fonction unimodale ?",
+      "duree_ms": 813,
+      "requetes": [
+        "Comment fonctionne la méthode de la section dorée pour minimiser une fonction unimodale ?",
+        "golden section method for unimodal function minimization",
+        "golden ratio optimization algorithm implementation details"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.1913
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 22,
+          "distance": 0.1946
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 34,
+          "distance": 0.2055
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.2102
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.2097
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "bissection-fr",
+      "categorie": "fr_proche",
+      "question": "Quel est le principe de la méthode de bissection ?",
+      "duree_ms": 1745,
+      "requetes": [
+        "Quel est le principe de la méthode de bissection ?",
+        "bisection method principle in numerical analysis",
+        "root-finding algorithm: bisection method implementation and mathematical foundation"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 27,
+          "distance": 0.1437
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 28,
+          "distance": 0.1326
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 27,
+          "distance": 0.16
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1823
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.1746
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "recherche-lineaire-fr",
+      "categorie": "fr_eloigne",
+      "question": "Comment choisir le pas lors d'une recherche linéaire inexacte ?",
+      "duree_ms": 1197,
+      "requetes": [
+        "Comment choisir le pas lors d'une recherche linéaire inexacte ?",
+        "step size selection for inexact linear search optimization",
+        "optimal step size determination in gradient-based numerical methods"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1787
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 49,
+          "distance": 0.1707
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 35,
+          "distance": 0.1633
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 34,
+          "distance": 0.1767
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 23,
+          "distance": 0.1754
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "armijo-fr",
+      "categorie": "fr_proche",
+      "question": "En quoi consiste la règle d'Armijo ?",
+      "duree_ms": 1651,
+      "requetes": [
+        "En quoi consiste la règle d'Armijo ?",
+        "Armijo line search rule in optimization algorithms",
+        "Armijo backtracking line search conditions for gradient-based methods"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 35,
+          "distance": 0.1224
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 36,
+          "distance": 0.1241
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 44,
+          "distance": 0.1247
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 36,
+          "distance": 0.129
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 34,
+          "distance": 0.1256
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "descente-gradient-fr",
+      "categorie": "fr_proche",
+      "question": "Comment fonctionne la méthode de descente de gradient ?",
+      "duree_ms": 1128,
+      "requetes": [
+        "Comment fonctionne la méthode de descente de gradient ?",
+        "gradient descent algorithm implementation in optimization problems",
+        "gradient descent convergence criteria and learning rate optimization"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 3,
+          "distance": 0.1398
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 44,
+          "distance": 0.1583
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 56,
+          "distance": 0.1661
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 60,
+          "distance": 0.1661
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 69,
+          "distance": 0.1685
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "newton-fr",
+      "categorie": "fr_proche",
+      "question": "Sur quelle idée repose la méthode de Newton en optimisation ?",
+      "duree_ms": 1821,
+      "requetes": [
+        "Sur quelle idée repose la méthode de Newton en optimisation ?",
+        "Newton's method for optimization iterative algorithm",
+        "Newton's method gradient descent second-order optimization numerical methods"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 65,
+          "distance": 0.1133
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 29,
+          "distance": 0.1182
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 30,
+          "distance": 0.1434
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 8,
+          "distance": 0.1278
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 68,
+          "distance": 0.1395
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "gradient-conjugue-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce que la méthode du gradient conjugué ?",
+      "duree_ms": 1061,
+      "requetes": [
+        "Qu'est-ce que la méthode du gradient conjugué ?",
+        "conjugate gradient method for optimization",
+        "conjugate gradient algorithm in numerical linear algebra for solving systems of linear equations"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 103,
+          "distance": 0.1443
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 95,
+          "distance": 0.1411
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 104,
+          "distance": 0.1498
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 94,
+          "distance": 0.1581
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 4,
+          "distance": 0.1529
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 0.0
+    },
+    {
+      "id": "quasi-newton-fr",
+      "categorie": "fr_proche",
+      "question": "Quel est l'intérêt des méthodes quasi-Newton ?",
+      "duree_ms": 5666,
+      "requetes": [
+        "Quel est l'intérêt des méthodes quasi-Newton ?",
+        "quasi-Newton methods in optimization for numerical analysis",
+        "quasi-Newton methods: applications in nonlinear least squares and trust-region problems"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 4,
+          "distance": 0.1345
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 110,
+          "distance": 0.1506
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 124,
+          "distance": 0.1464
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 112,
+          "distance": 0.1514
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 4,
+          "distance": 0.1451
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "ellipsoide-fr",
+      "categorie": "fr_proche",
+      "question": "Comment fonctionne la méthode de l'ellipsoïde en programmation convexe ?",
+      "duree_ms": 1101,
+      "requetes": [
+        "Comment fonctionne la méthode de l'ellipsoïde en programmation convexe ?",
+        "ellipsoid method convex optimization algorithm",
+        "ellipsoid method duality in convex programming implementation"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 145,
+          "distance": 0.1369
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 135,
+          "distance": 0.1376
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 129,
+          "distance": 0.1415
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 139,
+          "distance": 0.1466
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 139,
+          "distance": 0.1624
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "penalite-barriere-fr",
+      "categorie": "fr_proche",
+      "question": "Quelle est la différence entre les méthodes de pénalité et les méthodes barrière ?",
+      "duree_ms": 2205,
+      "requetes": [
+        "Quelle est la différence entre les méthodes de pénalité et les méthodes barrière ?",
+        "penalty methods in optimization vs barrier methods: mathematical formulation",
+        "barrier methods (log-barrier, interior-point methods) vs penalty methods (Lagrangian duality, augmented Lagrangian) in constrained optimization"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 218,
+          "distance": 0.1199
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 198,
+          "distance": 0.1145
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 6,
+          "distance": 0.1262
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 197,
+          "distance": 0.1346
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 196,
+          "distance": 0.1394
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "lagrangien-augmente-fr",
+      "categorie": "fr_proche",
+      "question": "Qu'est-ce qu'un lagrangien augmenté, et pourquoi l'utiliser ?",
+      "duree_ms": 1150,
+      "requetes": [
+        "Qu'est-ce qu'un lagrangien augmenté, et pourquoi l'utiliser ?",
+        "augmented Lagrangian method in optimization",
+        "augmented Lagrangian for constrained optimization applications"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 224,
+          "distance": 0.1418
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 233,
+          "distance": 0.1423
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 236,
+          "distance": 0.1475
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 233,
+          "distance": 0.1355
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 231,
+          "distance": 0.1364
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 0.0
+    },
+    {
+      "id": "bfs-en",
+      "categorie": "en",
+      "question": "How does breadth-first search work?",
+      "duree_ms": 1113,
+      "requetes": [
+        "How does breadth-first search work?",
+        "breadth-first search (BFS) algorithm implementation in graph theory",
+        "BFS vs depth-first search (DFS) comparison and time complexity analysis"
+      ],
+      "renvoyes": [
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1074
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 2,
+          "distance": 0.1622
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 5,
+          "distance": 0.162
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.1706
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 3,
+          "distance": 0.1665
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "mst-en",
+      "categorie": "en",
+      "question": "What is a minimum spanning tree and what is it used for?",
+      "duree_ms": 2147,
+      "requetes": [
+        "What is a minimum spanning tree and what is it used for?",
+        "minimum spanning tree (MST) definition",
+        "applications of minimum spanning tree in graph theory and network optimization"
+      ],
+      "renvoyes": [
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 8,
+          "distance": 0.1268
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 9,
+          "distance": 0.1933
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 17,
+          "distance": 0.1912
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 16,
+          "distance": 0.2243
+        },
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 37,
+          "distance": 0.2162
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "chi2-en",
+      "categorie": "en",
+      "question": "How do you perform a chi-square test of independence?",
+      "duree_ms": 1054,
+      "requetes": [
+        "How do you perform a chi-square test of independence?",
+        "chi-square test of independence statistical procedure",
+        "chi-square test of independence assumptions and interpretation guidelines"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.1551
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1543
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1888
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 16,
+          "distance": 0.2137
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.2065
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "eigen-en",
+      "categorie": "en",
+      "question": "What is the role of eigenvalues in PCA?",
+      "duree_ms": 1850,
+      "requetes": [
+        "What is the role of eigenvalues in PCA?",
+        "eigenvalues role principal component analysis (PCA) dimensionality reduction",
+        "PCA eigen decomposition significance eigenvectors eigenvalues variance explanation"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 13,
+          "distance": 0.1611
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 6,
+          "distance": 0.1699
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 1,
+          "distance": 0.1886
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 7,
+          "distance": 0.1918
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.1771
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "scheduling-en",
+      "categorie": "en",
+      "question": "How do you determine the earliest start date of a task in project scheduling?",
+      "duree_ms": 1449,
+      "requetes": [
+        "How do you determine the earliest start date of a task in project scheduling?",
+        "earliest start time (EST) in project scheduling",
+        "critical path method (CPM) earliest start date calculation"
+      ],
+      "renvoyes": [
+        {
+          "document": "VI. Scheduling",
+          "page": 6,
+          "distance": 0.1828
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 7,
+          "distance": 0.1857
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 11,
+          "distance": 0.1861
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.21
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 2,
+          "distance": 0.2021
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "sd-en",
+      "categorie": "en",
+      "question": "What does the standard deviation measure?",
+      "duree_ms": 1300,
+      "requetes": [
+        "What does the standard deviation measure?",
+        "standard deviation definition in statistics",
+        "standard deviation interpretation in probability distributions and data variability"
+      ],
+      "renvoyes": [
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 9,
+          "distance": 0.1843
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.1883
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 13,
+          "distance": 0.2067
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 8,
+          "distance": 0.2163
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 13,
+          "distance": 0.2159
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 0.6,
+      "hit_page": 1.0
+    },
+    {
+      "id": "golden-section-en",
+      "categorie": "en",
+      "question": "How does the golden section search method work?",
+      "duree_ms": 946,
+      "requetes": [
+        "How does the golden section search method work?",
+        "golden section search algorithm implementation in numerical optimization",
+        "golden ratio method for univariate function minimization"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 25,
+          "distance": 0.1385
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.1556
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1628
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 25,
+          "distance": 0.181
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1904
+        }
+      ],
+      "hit_doc": 1.0,
+      "rr_doc": 1.0,
+      "precision_doc": 1.0,
+      "hit_page": 1.0
+    },
+    {
+      "id": "hs-tarte",
+      "categorie": "hors_sujet",
+      "question": "Quelle est la recette de la tarte aux pommes ?",
+      "duree_ms": 1613,
+      "requetes": [
+        "Quelle est la recette de la tarte aux pommes ?",
+        "apple pie recipe basic ingredients and step-by-step preparation",
+        "classical baking techniques for fruit-based desserts with crust preparation"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 7,
+          "distance": 0.3065
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.288
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 77,
+          "distance": 0.3305
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 24,
+          "distance": 0.2913
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 221,
+          "distance": 0.3375
+        }
+      ]
+    },
+    {
+      "id": "hs-football",
+      "categorie": "hors_sujet",
+      "question": "Qui a gagné la Coupe du monde de football 2018 ?",
+      "duree_ms": 1060,
+      "requetes": [
+        "Qui a gagné la Coupe du monde de football 2018 ?",
+        "2018 FIFA World Cup winners",
+        "2018 FIFA World Cup final match details"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 17,
+          "distance": 0.2825
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 18,
+          "distance": 0.2921
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 25,
+          "distance": 0.3209
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 23,
+          "distance": 0.3416
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 35,
+          "distance": 0.3429
+        }
+      ]
+    },
+    {
+      "id": "hs-robinet",
+      "categorie": "hors_sujet",
+      "question": "Comment réparer un robinet qui fuit ?",
+      "duree_ms": 956,
+      "requetes": [
+        "Comment réparer un robinet qui fuit ?",
+        "leak detection in plumbing systems: causes and repair techniques for water pipe failures",
+        "how to fix a running toilet: common causes and step-by-step solutions for plumbing fixtures"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 5,
+          "distance": 0.3053
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 3,
+          "distance": 0.2974
+        },
+        {
+          "document": "I. Generalities",
+          "page": 1,
+          "distance": 0.3075
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 179,
+          "distance": 0.31
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 209,
+          "distance": 0.3035
+        }
+      ]
+    },
+    {
+      "id": "hs-grippe",
+      "categorie": "hors_sujet",
+      "question": "Quels sont les symptômes de la grippe ?",
+      "duree_ms": 1138,
+      "requetes": [
+        "Quels sont les symptômes de la grippe ?",
+        "symptoms of influenza virus infection in adults",
+        "common and severe signs of seasonal influenza (flu) in pediatric and adult populations"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 15,
+          "distance": 0.2713
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 16,
+          "distance": 0.3477
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.2733
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 2,
+          "distance": 0.2735
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 19,
+          "distance": 0.2752
+        }
+      ]
+    },
+    {
+      "id": "hs-pip",
+      "categorie": "hors_sujet",
+      "question": "Comment installer une bibliothèque Python avec pip ?",
+      "duree_ms": 971,
+      "requetes": [
+        "Comment installer une bibliothèque Python avec pip ?",
+        "installation of Python packages using pip command",
+        "pip install documentation for package management in Python"
+      ],
+      "renvoyes": [
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 13,
+          "distance": 0.2731
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 23,
+          "distance": 0.2681
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 10,
+          "distance": 0.2903
+        },
+        {
+          "document": "ST2DA-Chapter 1-2025-2026",
+          "page": 14,
+          "distance": 0.2896
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 13,
+          "distance": 0.2952
+        }
+      ]
+    }
+  ]
+}
