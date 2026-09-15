@@ -11,11 +11,13 @@ configuration qui l'a produit est inverifiable.
 import argparse
 import asyncio
 import datetime as dt
+import hashlib
 import json
 import logging
 import pathlib
 import subprocess
 import sys
+import time
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
 
@@ -39,11 +41,27 @@ K = 5
 
 CATEGORIES = {"fr_proche", "fr_eloigne", "en", "hors_sujet"}
 
-Strategie = Callable[[str, int], Awaitable[list[Passage]]]
+# Une strategie renvoie les passages ET les requetes effectivement lancees.
+Strategie = Callable[[str, int], Awaitable[tuple[list[Passage], list[str]]]]
+
+
+async def _hybride(question: str, nb: int) -> tuple[list[Passage], list[str]]:
+    return await retrieval.chercher(question, nb), [question]
+
+
+async def _reecriture(question: str, nb: int) -> tuple[list[Passage], list[str]]:
+    # Meme chemin que la production, en version detaillee. La reecriture
+    # n'est pas reproductible : rappeler le LLM apres coup ne redonne pas
+    # forcement les requetes que la mesure a vues. On les enregistre donc au
+    # moment de la mesure.
+    detail = await retrieval.chercher_avec_reecriture_detail(question, nb)
+    return detail.passages, detail.requetes
+
 
 # Les variantes de retrieval a comparer. En ajouter une = l'inscrire ici.
 STRATEGIES: dict[str, Strategie] = {
-    "hybride": retrieval.chercher,
+    "hybride": _hybride,
+    "reecriture": _reecriture,
 }
 
 
@@ -95,23 +113,52 @@ async def verifier_titres(questions: list[dict]) -> None:
         raise ValueError(f"Documents inconnus en base : {inconnus}")
 
 
+def empreinte_golden_set(chemin: pathlib.Path = GOLDEN_SET) -> str:
+    """Empreinte des etiquettes utilisees pour noter.
+
+    Deux resultats ne se comparent que s'ils ont ete notes avec le meme
+    golden set : corriger une etiquette change le score sans que le
+    retrieval ait bouge. Fins de ligne normalisees, pour que git (CRLF sous
+    Windows, LF ailleurs) ne change pas l'empreinte d'un contenu identique.
+    """
+    contenu = chemin.read_text(encoding="utf-8").replace("\r\n", "\n")
+    return hashlib.sha256(contenu.encode("utf-8")).hexdigest()[:12]
+
+
 def commit_courant() -> str:
+    """Commit courant, suffixe si le code a des modifications non commitees.
+
+    Sans ce suffixe, un resultat produit par du code non commite pretend
+    venir du dernier commit. C'est arrive : les premieres mesures de la
+    reecriture de requete ont ete enregistrees sous b82a66a, un commit qui
+    ne contenait pas encore la reecriture. Les resultats eux-memes sont
+    exclus du controle : sinon chaque execution rendrait la suivante
+    « modifiee ».
+    """
     try:
-        sortie = subprocess.run(
+        commit = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
             check=True,
-        )
+        ).stdout.strip()
+        modifications = subprocess.run(
+            ["git", "status", "--porcelain", "--", ".", ":(exclude)eval/resultats"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return "inconnu"
-    return sortie.stdout.strip()
+    return f"{commit}+modifications" if modifications else commit
 
 
 async def evaluer(strategie: Strategie, questions: list[dict]) -> list[dict]:
     lignes = []
     for q in questions:
-        passages = await strategie(q["question"], K)
+        debut = time.perf_counter()
+        passages, requetes = await strategie(q["question"], K)
+        duree_ms = (time.perf_counter() - debut) * 1000
         attendus = set(q.get("documents") or [])
         pages_attendues = {
             (doc, p) for doc, pages in (q.get("pages") or {}).items() for p in pages
@@ -123,6 +170,8 @@ async def evaluer(strategie: Strategie, questions: list[dict]) -> list[dict]:
             "id": q["id"],
             "categorie": q["categorie"],
             "question": q["question"],
+            "duree_ms": round(duree_ms),
+            "requetes": requetes,
             "renvoyes": [
                 {"document": p.titre, "page": p.page, "distance": round(p.distance, 4)}
                 for p in passages
@@ -183,6 +232,20 @@ def afficher(agregats: dict, reference: dict | None = None) -> None:
         print(f"{cat:<12} {m['n']:>3} {cellules}")
 
 
+def latences(lignes: list[dict]) -> dict:
+    """Mediane et 90e centile du temps de retrieval par question.
+
+    La mediane plutot que la moyenne : une pause de back-off sur quota
+    (429) gonfle quelques mesures et fausserait une moyenne. Le temps
+    inclut les appels reseau (LLM, embeddings, base) : c'est la latence
+    que l'utilisateur paiera, pas un temps de calcul local."""
+    durees = sorted(x["duree_ms"] for x in lignes)
+    if not durees:
+        return {"mediane": None, "p90": None}
+    p90 = durees[min(len(durees) - 1, int(0.9 * len(durees)))]
+    return {"mediane": durees[len(durees) // 2], "p90": p90}
+
+
 def afficher_paires(questions: list[dict], lignes: list[dict]) -> None:
     """Meme besoin d'information, pose en francais puis en anglais : l'ecart
     entre les deux isole l'effet de la langue, toutes choses egales par
@@ -231,6 +294,17 @@ async def principal(nom: str, strategie_nom: str, comparer: str | None) -> None:
     agregats = agreger(lignes)
     afficher(agregats, reference["agregats"] if reference else None)
     afficher_paires(questions, lignes)
+    latence = latences(lignes)
+    ref_latence = (reference or {}).get("latence_ms")
+    suffixe = (
+        f"  (reference : {ref_latence['mediane']} / {ref_latence['p90']} ms)"
+        if ref_latence
+        else ""
+    )
+    print(
+        f"\nLatence du retrieval : mediane {latence['mediane']} ms, "
+        f"p90 {latence['p90']} ms{suffixe}"
+    )
     if reference:
         afficher_changements(lignes, reference)
 
@@ -244,13 +318,16 @@ async def principal(nom: str, strategie_nom: str, comparer: str | None) -> None:
         "strategie": strategie_nom,
         "date": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
         "commit": commit_courant(),
+        "golden_set": empreinte_golden_set(),
         "parametres": {
             "k": K,
             "nb_candidats": retrieval.NB_CANDIDATS,
             "k_rrf": retrieval.K_RRF,
             "distance_maximale": retrieval.DISTANCE_MAXIMALE,
+            "modele_reecriture": settings.mistral_reecriture_model,
             "modele_embeddings": settings.mistral_embed_model,
         },
+        "latence_ms": latences(lignes),
         "agregats": agregats,
         "questions": lignes,
     }

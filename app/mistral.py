@@ -74,3 +74,58 @@ def decrire_erreur_http(response: httpx.Response) -> str:
     if message_fournisseur:
         detail += f" : {message_fournisseur}"
     return detail
+
+
+async def appeler_chat(
+    messages: list[dict[str, str]],
+    *,
+    modele: str | None = None,
+    temperature: float | None = None,
+    format_json: bool = False,
+) -> str:
+    """Appel a /chat/completions, pannes traduites en LLMError.
+
+    Deplace depuis llm.py : la reecriture de requete, appelee par le
+    retrieval, en a besoin aussi. Or llm.py importe deja le retrieval — le
+    laisser la-bas aurait recree un cycle d'imports.
+    """
+    settings = get_settings()
+    payload: dict = {"model": modele or settings.mistral_model, "messages": messages}
+    if temperature is not None:
+        payload["temperature"] = temperature
+    if format_json:
+        payload["response_format"] = {"type": "json_object"}
+    headers = {"Authorization": f"Bearer {settings.mistral_api_key}"}
+
+    try:
+        response = await get_client().post(
+            "/chat/completions", json=payload, headers=headers
+        )
+    except httpx.HTTPError as exc:
+        # Reseau coupe, DNS, timeout... la dependance externe est tombee.
+        # On nomme le TYPE d'exception : httpx.ReadTimeout a un str() vide,
+        # et « Appel au LLM impossible :  » n'aide personne a 3h du matin.
+        logger.exception("Appel LLM impossible")
+        raise LLMError(
+            f"Appel au LLM impossible ({type(exc).__name__}) : {exc}".rstrip(" :")
+        ) from exc
+
+    if response.is_error:
+        logger.error("LLM HTTP %s : %s", response.status_code, response.text[:500])
+        raise LLMError(decrire_erreur_http(response))
+
+    try:
+        contenu = response.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, ValueError) as exc:
+        logger.exception("Reponse LLM inattendue")
+        raise LLMError("Reponse du LLM inexploitable") from exc
+
+    # Le fournisseur peut renvoyer 200 avec un contenu vide (filtrage, budget
+    # de tokens epuise...). On refuse de faire passer ca pour une reussite :
+    # une reponse vide qui remonte en 200 est un bug qu'on cherche pendant
+    # des heures.
+    if not contenu or not contenu.strip():
+        logger.error("Le LLM a renvoye un contenu vide : %s", response.text[:500])
+        raise LLMError("Le LLM a renvoye une reponse vide")
+
+    return contenu

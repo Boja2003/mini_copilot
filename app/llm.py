@@ -11,11 +11,16 @@ chaque question, et on lui interdit de repondre autre chose.
 import logging
 from dataclasses import dataclass
 
-import httpx
-
 from .config import get_settings
-from .mistral import LLMError, decrire_erreur_http, get_client
-from .retrieval import Passage, chercher, construire_contexte
+from .mistral import LLMError, appeler_chat
+from .retrieval import (
+    Passage,
+    chercher,
+    chercher_avec_reecriture,
+    construire_contexte,
+)
+
+__all__ = ["LLMError", "Reponse", "generate_answer"]
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +47,10 @@ de cours de l'utilisateur. Aucun passage pertinent n'a ete trouve pour cette \
 question. Reponds uniquement : « Je ne trouve pas la reponse dans tes \
 supports de cours. », puis propose en une phrase de reformuler la question."""
 
+# Nom historique conserve dans ce module : la fonction vit desormais dans
+# mistral.py (voir sa docstring pour la raison du deplacement).
+_appeler_mistral = appeler_chat
+
 
 @dataclass(frozen=True)
 class Reponse:
@@ -49,48 +58,21 @@ class Reponse:
     passages: list[Passage]
 
 
-async def _appeler_mistral(messages: list[dict[str, str]]) -> str:
-    settings = get_settings()
-    payload = {"model": settings.mistral_model, "messages": messages}
-    headers = {"Authorization": f"Bearer {settings.mistral_api_key}"}
+async def _rechercher(question: str) -> list[Passage]:
+    """Choisit la strategie de retrieval selon la configuration.
 
-    try:
-        response = await get_client().post(
-            "/chat/completions", json=payload, headers=headers
-        )
-    except httpx.HTTPError as exc:
-        # Reseau coupe, DNS, timeout... la dependance externe est tombee.
-        # On nomme le TYPE d'exception : httpx.ReadTimeout a un str() vide,
-        # et « Appel au LLM impossible :  » n'aide personne a 3h du matin.
-        logger.exception("Appel LLM impossible")
-        raise LLMError(
-            f"Appel au LLM impossible ({type(exc).__name__}) : {exc}".rstrip(" :")
-        ) from exc
-
-    if response.is_error:
-        logger.error("LLM HTTP %s : %s", response.status_code, response.text[:500])
-        raise LLMError(decrire_erreur_http(response))
-
-    try:
-        contenu = response.json()["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, ValueError) as exc:
-        logger.exception("Reponse LLM inattendue")
-        raise LLMError("Reponse du LLM inexploitable") from exc
-
-    # Le fournisseur peut renvoyer 200 avec un contenu vide (filtrage, budget
-    # de tokens epuise...). On refuse de faire passer ca pour une reussite :
-    # une reponse vide qui remonte en 200 est un bug qu'on cherche pendant
-    # des heures.
-    if not contenu or not contenu.strip():
-        logger.error("Le LLM a renvoye un contenu vide : %s", response.text[:500])
-        raise LLMError("Le LLM a renvoye une reponse vide")
-
-    return contenu
+    La reecriture de requete ajoute un appel LLM a chaque question : elle
+    ne s'active que si les chiffres de eval/ montrent qu'elle en vaut le
+    cout.
+    """
+    if get_settings().reecriture_requetes:
+        return await chercher_avec_reecriture(question)
+    return await chercher(question)
 
 
 async def generate_answer(question: str) -> Reponse:
     """Le pipeline RAG complet : chercher, puis repondre a partir du trouve."""
-    passages = await chercher(question)
+    passages = await _rechercher(question)
 
     if not passages:
         texte = await _appeler_mistral(

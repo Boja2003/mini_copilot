@@ -2,9 +2,17 @@
 
 Aucun LLM ici, et c'est un choix : si le golden set dit « la reponse est
 dans III. Breadth first search », verifier que ce document remonte est une
-simple comparaison. Deterministe, gratuit, reproductible — deux executions
-sur les memes donnees donnent exactement le meme chiffre, ce qu'aucun juge
-LLM ne garantit.
+simple comparaison. Le CALCUL est deterministe et gratuit : les memes listes
+donnent toujours le meme chiffre, ce qu'aucun juge LLM ne garantit.
+
+Le PIPELINE mesure, lui, ne l'est pas tout a fait. Deux executions de la
+strategie hybride, a une demi-heure d'intervalle, ont renvoye pour les memes
+chunks des distances differant de 1e-3 au plus, et deux quasi-egalites se
+sont inversees : un passage de precision perdu sur une question. La
+reecriture de requete varie davantage : a temperature 0, trois appels
+identiques ne donnent presque jamais les memes requetes. Un ecart d'une
+question entre deux variantes est donc du bruit ; pour trancher, il faut
+repeter les mesures.
 
 Toutes les fonctions prennent une liste de booleens : « le passage au rang
 i est-il pertinent ? », dans l'ordre ou le retrieval les a renvoyes.

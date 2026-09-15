@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     mistral_model: str = "ministral-8b-latest"
     mistral_base_url: str = "https://api.mistral.ai/v1"
     mistral_embed_model: str = "mistral-embed"
+    # Reecriture de requete (voir app/reecriture.py). Desactivee par defaut :
+    # elle ajoute un appel LLM a chaque question, et ne s'active que si eval/
+    # montre qu'elle en vaut le cout.
+    reecriture_requetes: bool = False
+    mistral_reecriture_model: str = "ministral-8b-latest"
     # 30 s suffisaient avant le RAG. Avec 5 passages en contexte, la
     # reponse est bien plus longue a generer : mesure en production,
     # une question sur un algorithme depassait les 30 s et tombait en

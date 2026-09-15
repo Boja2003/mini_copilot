@@ -1,9 +1,10 @@
 # Golden set : les questions de reference pour mesurer le retrieval.
 #
 # Chaque question dit ou se trouve la reponse. Les documents et les pages ont
-# ete etiquetes en lisant le texte extrait du corpus, JAMAIS avec notre propre
+# ete etiquetes en lisant le texte du corpus, JAMAIS avec notre propre
 # retrieval : etiqueter avec le systeme qu'on evalue rendrait la mesure
-# circulaire.
+# circulaire. (Le livre Numericalmethodsinconvexopt a ete lu directement en
+# base, par document, pendant que son PDF etait absent du dossier.)
 #
 # Tout le corpus est en anglais. Les categories isolent donc l'effet de la
 # langue :
@@ -221,7 +222,11 @@
   categorie: fr_eloigne
   paire: eigen-en
   documents: ["Chapter 2- Principal Component Analysis"]
-  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6]}
+  # p.11 ajoutee apres relecture : la Proposition 2.4 relie la valeur propre
+  # a la somme des correlations au carre. Relecture declenchee par un
+  # resultat du systeme, donc correction asymetrique : on ne relit que la ou
+  # le systeme conteste l'etiquette, jamais la ou il l'approuve a tort.
+  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6, 11]}
 
 - id: cercle-correlations-fr
   question: "Comment interpréter un cercle des corrélations ?"
@@ -249,6 +254,12 @@
   pages: {"ST2DA-Chapter 1-2025-2026": [8, 9]}
 
 # --- Optimisation convexe ---------------------------------------------------
+#
+# Apres la decision de garder le livre Numericalmethodsinconvexopt dans le
+# corpus, les QUATRE questions de cette section ont ete relues contre lui, et
+# pas seulement celles ou le systeme avait diverge. Le livre repond a
+# lagrangien-fr, kkt-fr et fortement-convexe-fr (ajoute) ; il utilise la
+# notion d'ensemble convexe sans jamais la definir (non ajoute).
 
 - id: ensemble-convexe-fr
   question: "Quelle est la définition d'un ensemble convexe ?"
@@ -259,20 +270,95 @@
 - id: kkt-fr
   question: "Qu'énonce le théorème de Karush-Kuhn-Tucker ?"
   categorie: fr_proche
-  documents: ["Convex_optimization2026FINALVERSION"]
-  pages: {"Convex_optimization2026FINALVERSION": [24, 25]}
+  documents: ["Convex_optimization2026FINALVERSION", "Numericalmethodsinconvexopt"]
+  pages:
+    "Convex_optimization2026FINALVERSION": [24, 25]
+    "Numericalmethodsinconvexopt": [166, 167]
 
 - id: fortement-convexe-fr
   question: "Qu'est-ce qu'une fonction fortement convexe ?"
   categorie: fr_proche
-  documents: ["Convex_optimization2026FINALVERSION"]
-  pages: {"Convex_optimization2026FINALVERSION": [10, 11, 15]}
+  documents: ["Convex_optimization2026FINALVERSION", "Numericalmethodsinconvexopt"]
+  pages:
+    "Convex_optimization2026FINALVERSION": [10, 11, 15]
+    "Numericalmethodsinconvexopt": [53]
 
 - id: lagrangien-fr
   question: "Qu'est-ce que le lagrangien d'un problème d'optimisation sous contraintes ?"
   categorie: fr_proche
-  documents: ["Convex_optimization2026FINALVERSION"]
-  pages: {"Convex_optimization2026FINALVERSION": [23, 24]}
+  documents: ["Convex_optimization2026FINALVERSION", "Numericalmethodsinconvexopt"]
+  pages:
+    "Convex_optimization2026FINALVERSION": [23, 24]
+    "Numericalmethodsinconvexopt": [159, 160]
+
+# --- Methodes numeriques (livre Numericalmethodsinconvexopt) -----------------
+
+- id: section-doree-fr
+  question: "Comment fonctionne la méthode de la section dorée pour minimiser une fonction unimodale ?"
+  categorie: fr_eloigne
+  paire: golden-section-en
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [25, 26]}
+
+- id: bissection-fr
+  question: "Quel est le principe de la méthode de bissection ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [26, 27]}
+
+- id: recherche-lineaire-fr
+  question: "Comment choisir le pas lors d'une recherche linéaire inexacte ?"
+  categorie: fr_eloigne
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [34, 35]}
+
+- id: armijo-fr
+  question: "En quoi consiste la règle d'Armijo ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [34, 35]}
+
+- id: descente-gradient-fr
+  question: "Comment fonctionne la méthode de descente de gradient ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [43, 44]}
+
+- id: newton-fr
+  question: "Sur quelle idée repose la méthode de Newton en optimisation ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [65, 66]}
+
+- id: gradient-conjugue-fr
+  question: "Qu'est-ce que la méthode du gradient conjugué ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [89, 90]}
+
+- id: quasi-newton-fr
+  question: "Quel est l'intérêt des méthodes quasi-Newton ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [109, 110]}
+
+- id: ellipsoide-fr
+  question: "Comment fonctionne la méthode de l'ellipsoïde en programmation convexe ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [138, 139]}
+
+- id: penalite-barriere-fr
+  question: "Quelle est la différence entre les méthodes de pénalité et les méthodes barrière ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [195, 196, 197]}
+
+- id: lagrangien-augmente-fr
+  question: "Qu'est-ce qu'un lagrangien augmenté, et pourquoi l'utiliser ?"
+  categorie: fr_proche
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [219, 220]}
 
 # --- Groupe temoin en anglais -------------------------------------------------
 
@@ -298,7 +384,11 @@
   question: "What is the role of eigenvalues in PCA?"
   categorie: en
   documents: ["Chapter 2- Principal Component Analysis"]
-  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6]}
+  # p.11 ajoutee apres relecture : la Proposition 2.4 relie la valeur propre
+  # a la somme des correlations au carre. Relecture declenchee par un
+  # resultat du systeme, donc correction asymetrique : on ne relit que la ou
+  # le systeme conteste l'etiquette, jamais la ou il l'approuve a tort.
+  pages: {"Chapter 2- Principal Component Analysis": [3, 4, 5, 6, 11]}
 
 - id: scheduling-en
   question: "How do you determine the earliest start date of a task in project scheduling?"
@@ -311,6 +401,12 @@
   categorie: en
   documents: ["ST2DA-Chapter 1-2025-2026"]
   pages: {"ST2DA-Chapter 1-2025-2026": [8, 9]}
+
+- id: golden-section-en
+  question: "How does the golden section search method work?"
+  categorie: en
+  documents: ["Numericalmethodsinconvexopt"]
+  pages: {"Numericalmethodsinconvexopt": [25, 26]}
 
 # --- Hors sujet ---------------------------------------------------------------
 
