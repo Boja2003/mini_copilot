@@ -2,18 +2,21 @@
 
 **En ligne : https://mini-copilot.fly.dev** — `/health` est public,
 `/chat` exige le header `X-API-Key`.
+**Code : https://github.com/Boja2003/mini_copilot** — lint, tests et build
+Docker rejoués à chaque push.
 
 Un assistant qui répond à partir de mes supports de cours, et uniquement à
 partir d'eux : recherche hybride (vecteurs + mots-clés) dans Postgres et
 pgvector, réponse générée par Mistral avec ses sources (document et page),
 refus explicite quand les cours ne contiennent pas la réponse. Chaque
-évolution du retrieval est décidée sur un golden set mesuré, pas à l'œil.
+évolution du retrieval est décidée sur un golden set mesuré, pas à l'œil, et
+chaque requête en production laisse une trace détaillée.
 
 ## Le trajet d'une requête
 
 ```
 POST /chat ──► main.py        clé X-API-Key, validation Pydantic, codes HTTP
-                  │
+                  │           ouvre la trace « chat » (observabilite.py)
                   ▼
               llm.py          orchestre le RAG
                   │
@@ -27,6 +30,9 @@ POST /chat ──► main.py        clé X-API-Key, validation Pydantic, codes H
                   │
                   └──► mistral.py       prompt = passages + question → réponse
 ```
+
+Chaque étape de ce trajet devient une étape de la trace : durée, entrées,
+sorties et tokens consommés (voir « Observabilité »).
 
 Ingestion (hors ligne, `python -m app.ingest`) :
 
@@ -48,11 +54,12 @@ fichier ──► parsers.py ──► chunking.py ──► embeddings.py ─�
 | `app/ingest.py` | Pipeline d'ingestion, en ligne de commande. |
 | `app/db.py` | Postgres + pgvector, SQL écrit à la main. |
 | `app/mistral.py` | Client HTTP partagé et appel chat vers Mistral. |
+| `app/observabilite.py` | Traces Langfuse : le seul module qui parle au SDK. |
 | `app/config.py` | Config et secrets, lus depuis l'environnement. |
 | `eval/` | Golden set, métriques, mesures et synthèse. |
 | `Dockerfile` | Empaquetage : la fin du « ça marche chez moi ». |
 | `docker-compose.yml` | L'API et sa base Postgres + pgvector. |
-| `tests/` | Tests sans réseau : LLM, embeddings et base remplacés par des doubles. |
+| `tests/` | 74 tests sans réseau : LLM, embeddings, base et traces doublés. |
 
 ## Démarrer en local
 
@@ -68,8 +75,10 @@ python run.py
 
 Sous Windows, `python run.py` plutôt que `uvicorn` directement : psycopg en
 mode asynchrone exige une boucle d'événements que Windows n'utilise pas par
-défaut (voir `app/boucle.py`). En production, sur Linux, la question ne se
-pose pas.
+défaut (voir `app/boucle.py`). Attention, c'est plus subtil qu'il n'y paraît :
+uvicorn choisit lui-même sa boucle, et ne retient la bonne que parce que
+`run.py` active le rechargement automatique, qui le fait tourner dans un
+sous-processus. En production, sur Linux, la question ne se pose pas.
 
 ### Vérifier que ça marche
 
@@ -182,6 +191,12 @@ les paramètres, la latence, et pour chaque question les requêtes lancées et
 les passages renvoyés. `eval.synthese` refuse de comparer des mesures notées
 avec des golden sets différents.
 
+L'historique du dépôt a été réécrit avant publication (adresse e-mail de
+l'auteur) : les identifiants de commit enregistrés dans les résultats
+renvoient à l'ancien historique. La table
+[`eval/resultats/correspondance_commits.md`](eval/resultats/correspondance_commits.md)
+fait le lien.
+
 ### Ce que les mesures ont appris
 
 - **Le pipeline n'est pas parfaitement reproductible.** Lors d'une première
@@ -201,9 +216,8 @@ avec des golden sets différents.
 ### Résultats
 
 Mesures répétées sur le golden set `7be5592d2ef6`, stratégies alternées dans
-le temps (commits `4f5051f` et `0649b60`, code identique). 58 questions avec
-réponse attendue, dont 20 en français à termes éloignés. Moyenne sur les
-répétitions, [min–max] entre crochets.
+le temps. 58 questions avec réponse attendue, dont 20 en français à termes
+éloignés. Moyenne sur les répétitions, [min–max] entre crochets.
 
 | Stratégie | Répét. | Hit@5 | MRR | Précision@5 | FR éloigné Hit@5 | FR éloigné MRR | FR éloigné Précision@5 | Latence médiane |
 |---|---|---|---|---|---|---|---|---|
@@ -225,8 +239,8 @@ Ce qui est établi (étendues disjointes) :
 
 `REECRITURE_REQUETES=true` active la recherche multi-requêtes : la question
 d'origine plus deux reformulations en anglais technique, dont les classements
-sont fusionnés par RRF. Désactivée par défaut, parce qu'elle ajoute un appel
-LLM à chaque question. `MISTRAL_REECRITURE_MODEL` choisit le modèle.
+sont fusionnés par RRF. **Activée en production avec `ministral-3b-latest`**,
+sur la foi des mesures ci-dessus. `MISTRAL_REECRITURE_MODEL` choisit le modèle.
 
 Trois garde-fous :
 - la question d'origine est toujours conservée : une mauvaise reformulation
@@ -237,6 +251,67 @@ Trois garde-fous :
   écrire « parcours en largeur → breadth-first search » soufflerait la
   réponse à la question d'évaluation, et le score ne mesurerait plus rien.
 
+## Observabilité
+
+Chaque requête `/chat` devient une **trace Langfuse** : réécriture, embeddings,
+chaque recherche SQL et génération, avec durées, entrées, sorties et tokens.
+`/chat` renvoie l'identifiant de la trace (`trace_id`), qui relie une réponse
+signalée à sa trace complète.
+
+```bash
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com   # dépend de ta région
+LANGFUSE_ENVIRONMENT=local                     # « production » sur Fly.io
+```
+
+Quatre règles :
+- **sans les deux clés, le traçage est désactivé** et l'application tourne
+  exactement comme avant ;
+- **l'ingestion et l'évaluation ne tracent pas** : 1076 chunks ou 63 questions
+  produiraient des milliers d'observations sans requête à laquelle les
+  rattacher ;
+- **aucun test n'envoie de trace** (`tests/conftest.py`), car le `.env` local
+  contient les vraies clés et pydantic-settings le lit ;
+- **la trace ne commence qu'après l'authentification** : une requête refusée
+  ne produit rien.
+
+### Ce que la première trace a répondu
+
+L'étape existait pour une question précise : après l'activation de la
+réécriture, une réponse en production était passée de 6,5 s à 16,9 s, sans
+qu'on sache pourquoi. Mesure, sur la même question, en local puis en
+production :
+
+| Étape | Local | Production |
+|---|---|---|
+| Réécriture (`ministral-3b`) | 0,65 s | 0,55 s |
+| Embeddings | 0,40 s | 0,27 s |
+| Recherches SQL (3) | 0,72 + 0,06 + 0,06 s | 0,06 + 0,04 + 0,07 s |
+| **Génération de la réponse** | **10,62 s (85 %)** | **10,30 s (91 %)** |
+| Total | 12,52 s | 11,29 s |
+
+- **La génération domine**, et de loin. Le retrieval complet, réécriture
+  comprise, tient en environ 1 s en production.
+- **Mais sa durée n'est pas une simple fonction de la longueur de la
+  réponse** : 1310 tokens en 10,62 s (≈ 123 tokens/s) contre 549 tokens en
+  10,30 s (≈ 53 tokens/s). Le débit de Mistral a varié d'un facteur 2,3 entre
+  deux appels. La longueur compte, la charge du fournisseur aussi, et deux
+  mesures ne suffisent pas à les séparer.
+- **La première requête SQL coûte 12 fois les suivantes en local** (0,72 s
+  contre 0,06 s) : c'est l'ouverture de la connexion vers Neon. En production,
+  où l'application et la base sont toutes deux en Europe, l'écart disparaît.
+
+### Un piège du SDK
+
+`fermer()` appelle `flush()` et jamais `shutdown()`. Les clients Langfuse
+partagent un gestionnaire de ressources par clé publique : `shutdown()` arrête
+ses threads d'envoi, un nouveau client avec la même clé réutilise ce
+gestionnaire arrêté, et la fermeture suivante attend pour toujours. C'est ce
+qui figeait la suite de tests, où chaque test démarre puis arrête
+l'application. L'arrêt définitif reste assuré : le SDK enregistre lui-même son
+`shutdown()` via `atexit`.
+
 ## Tests et qualité
 
 ```bash
@@ -244,9 +319,9 @@ pytest -q
 ruff check .
 ```
 
-Les tests ne touchent jamais l'API Mistral ni la base (un test qui dépend du
-réseau est un pari, pas un test). La CI GitHub Actions rejoue `ruff` +
-`pytest` + le build Docker à chaque push.
+Les tests ne touchent jamais l'API Mistral, ni la base, ni Langfuse (un test
+qui dépend du réseau est un pari, pas un test). La CI GitHub Actions rejoue
+`ruff` + `pytest` + le build Docker à chaque push.
 
 ## Docker
 
@@ -259,7 +334,7 @@ docker compose up --build
 `.env` et `.env.prod` sont dans `.gitignore` : tes clés ne partiront jamais
 sur GitHub. `.env.example` est le modèle versionné, sans secret. En
 production, les clés sont fournies comme variables d'environnement
-(`fly secrets set`) — jamais dans l'image.
+(`fly secrets set`) — jamais dans l'image ni dans `fly.toml`.
 
 ## Dépannage
 
@@ -280,10 +355,10 @@ POST le révèle. Relevé sur ce compte :
 | `mistral-medium-latest` | 429 | 0 |
 | `mistral-small-latest` | 429 | 0 |
 | `magistral-small-latest` | 429 | 0 |
-| `ministral-8b-latest` | OK (défaut du projet) | 188 |
+| `ministral-8b-latest` | OK (génération) | 188 |
 | `open-mistral-nemo` | OK | 188 |
 | `open-mistral-7b` | OK | 188 |
-| `ministral-3b-latest` | OK | 750 |
+| `ministral-3b-latest` | OK (réécriture) | 750 |
 | `mistral-embed` | OK | 60 |
 
 Un `403 « not available in your subscription »` est différent : le modèle
@@ -304,6 +379,12 @@ Plus d'une ligne `LISTENING` = plusieurs serveurs se disputent le port, et
 
 Un contenu vide renvoyé par le LLM ne passe jamais en `200` : il devient un
 `502 « Le LLM a renvoye une reponse vide »`.
+
+### `psycopg ... ProactorEventLoop` au démarrage
+
+Boucle d'événements incompatible sous Windows : lance `python run.py`. Si tu
+démarres uvicorn toi-même **sans rechargement automatique**, impose la boucle :
+`asyncio.run(uvicorn.Server(config).serve(), loop_factory=asyncio.SelectorEventLoop)`.
 
 ## Mise en ligne (Fly.io)
 
@@ -333,7 +414,7 @@ fly launch --no-deploy
 injectés comme variables d'environnement au démarrage :
 
 ```bash
-fly secrets set MISTRAL_API_KEY=... API_KEY=... DATABASE_URL=...
+fly secrets set MISTRAL_API_KEY=... API_KEY=... DATABASE_URL=... LANGFUSE_PUBLIC_KEY=... LANGFUSE_SECRET_KEY=...
 ```
 
 Puis :
@@ -364,13 +445,27 @@ machines), `fly secrets list` (noms des secrets, jamais leurs valeurs).
 s'éteint faute de trafic et redémarre à la requête suivante. Zéro coût au
 repos, contre quelques secondes de réveil à froid sur le premier appel.
 
+## Limites connues
+
+- L'ingestion **ne supprime pas** un document dont le fichier a disparu.
+- Le golden set est rédigé par le constructeur du système : à enrichir avec
+  de vraies questions de révision.
+- Le générateur du guide PDF (`docs/`) n'est pas versionné : le guide décrit
+  l'état antérieur à l'étape 3 et ne peut pas être régénéré tel quel.
+- Deux machines Fly alors qu'une suffirait (`fly scale count 1`).
+- Les actions GitHub `checkout@v4` et `setup-python@v5` sont signalées comme
+  dépréciées (Node.js 20).
+- Les formules mathématiques sont mutilées par l'extraction PDF.
+
 ## Suite
 
 - [x] **Étape 1** — squelette FastAPI + `/chat` + Docker
 - [x] **Étape 1b** — déployé sur Fly.io (région cdg, scale-to-zero)
 - [x] **Étape 2** — ingestion multi-format + pgvector + recherche hybride
-- [ ] **Étape 3** — Langfuse pour tracer chaque appel LLM
-- [x] **Étape 4** — golden set, métriques de retrieval, réécriture de requête mesurée
-- [ ] **Étape 4b** — évaluation de la génération (fidélité aux passages, refus du hors-sujet)
+- [x] **Étape 3** — observabilité Langfuse, chaque requête tracée
+- [x] **Étape 4** — golden set, métriques de retrieval, réécriture mesurée
+- [x] **Dépôt publié** sur GitHub, CI active
+- [ ] **Étape 4b** — évaluation de la génération : citations valides, refus du
+      hors-sujet, fidélité aux passages
 - [ ] **Étape 5** — couche agent (LangGraph) pour le multi-étapes
 - [ ] **Étape 6** — CD, cache Redis, modèle auto-hébergé (vLLM / Ollama)
