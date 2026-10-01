@@ -16,6 +16,14 @@ primary_region = "cdg"  # Paris
   # de 750 req/min au lieu de 188.
   REECRITURE_REQUETES = "true"
   MISTRAL_REECRITURE_MODEL = "ministral-3b-latest"
+  # Couche agent activee apres mesure (eval/resultats/multisauts-*.json,
+  # commit 216c4ec) : 13 questions multi-sauts completes sur 14 contre 9,
+  # sans perte a un saut (Hit@5 1.000) ni sur les controles de generation
+  # (tous a 1.000). Cout : +2,0 s par question.
+  # ATTENTION : l'agent PREND LE PAS sur REECRITURE_REQUETES ci-dessus (voir
+  # app/llm.py). La reecriture reste declaree pour qu'un AGENT_ACTIF=false
+  # restitue immediatement la configuration la mieux mesuree a un saut.
+  AGENT_ACTIF = "true"
   # Observabilite (etape 3). L'environnement separe les traces de production
   # de celles du developpement local dans le meme projet Langfuse. Les cles
   # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY sont des SECRETS : elles passent
