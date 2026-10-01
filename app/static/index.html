@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mini_copilot</title>
+<style>
+  :root {
+    --fond: #fbfaf8; --texte: #1c1a17; --discret: #6b6560;
+    --trait: #e2ddd6; --accent: #7a4b2a; --carte: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fond: #17161a; --texte: #ece9e4; --discret: #9b958e;
+      --trait: #302d33; --accent: #d09a6a; --carte: #1f1d22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1rem 4rem; background: var(--fond); color: var(--texte);
+    font: 16px/1.6 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  }
+  main { max-width: 46rem; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  .sous-titre { color: var(--discret); margin: 0 0 2rem; font-size: .92rem; }
+  label { display: block; font-size: .82rem; color: var(--discret); margin-bottom: .35rem; }
+  textarea, input {
+    width: 100%; padding: .7rem .8rem; border: 1px solid var(--trait); border-radius: 8px;
+    background: var(--carte); color: var(--texte); font: inherit; font-size: .95rem;
+  }
+  textarea { min-height: 5.5rem; resize: vertical; }
+  textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .ligne { display: flex; gap: .75rem; align-items: flex-end; margin-top: 1rem; }
+  .ligne > div { flex: 1; }
+  button {
+    padding: .7rem 1.4rem; border: 0; border-radius: 8px; background: var(--accent);
+    color: #fff; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  button:disabled { opacity: .55; cursor: progress; }
+  .message { margin-top: 1.5rem; padding: .8rem 1rem; border-radius: 8px;
+             border: 1px solid var(--trait); background: var(--carte); font-size: .92rem; }
+  .message.erreur { border-color: #c0523f; color: #c0523f; }
+  #reponse { margin-top: 2rem; display: none; }
+  #texte { white-space: pre-wrap; }
+  #texte strong { font-weight: 650; }
+  .citation { color: var(--accent); font-weight: 600; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em;
+       color: var(--discret); margin: 2rem 0 .6rem; }
+  ol { margin: 0; padding-left: 1.4rem; }
+  li { margin-bottom: .3rem; font-size: .92rem; }
+  li .page { color: var(--discret); }
+  footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--trait);
+           color: var(--discret); font-size: .8rem; }
+  code { font-family: ui-monospace, "Cascadia Code", monospace; font-size: .85em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>mini_copilot</h1>
+  <p class="sous-titre">Questions sur mes supports de cours. Les réponses ne
+  sortent que des passages retrouvés, avec leurs sources.</p>
+
+  <form id="formulaire">
+    <label for="question">Question</label>
+    <textarea id="question" required
+      placeholder="Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun ?"></textarea>
+    <div class="ligne">
+      <div>
+        <label for="cle">Clé de service (X-API-Key)</label>
+        <input id="cle" type="password" autocomplete="off" required>
+      </div>
+      <button id="envoyer" type="submit">Demander</button>
+    </div>
+  </form>
+
+  <div id="etat" class="message" style="display:none"></div>
+
+  <section id="reponse">
+    <div id="texte"></div>
+    <h2>Sources</h2>
+    <ol id="sources"></ol>
+    <footer>
+      Modèle <code id="modele"></code> · trace Langfuse <code id="trace"></code>
+    </footer>
+  </section>
+</main>
+
+<script>
+// La cle n'est jamais dans la page livree : elle est saisie ici et gardee
+// dans sessionStorage, donc oubliee a la fermeture de l'onglet. Elle ne part
+// que dans l'en-tete X-API-Key de /chat, jamais dans une URL — un parametre
+// d'URL finirait dans les journaux d'acces.
+const CLE_STOCKEE = "mini_copilot.cle";
+const champCle = document.getElementById("cle");
+const champQuestion = document.getElementById("question");
+const bouton = document.getElementById("envoyer");
+const etat = document.getElementById("etat");
+const bloc = document.getElementById("reponse");
+
+try { champCle.value = sessionStorage.getItem(CLE_STOCKEE) || ""; } catch (e) {}
+
+function afficherEtat(texte, erreur) {
+  etat.textContent = texte;
+  etat.className = erreur ? "message erreur" : "message";
+  etat.style.display = texte ? "block" : "none";
+}
+
+// Le texte du modele est insere comme TEXTE, jamais comme HTML : on echappe
+// d'abord, et on ne reintroduit que deux balises, pour le gras et les
+// citations. Un RAG recopie des passages d'un corpus ; traiter sa sortie
+// comme du HTML de confiance serait une faille.
+function rendre(texte) {
+  const echappe = texte
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return echappe
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[(\d+)\]/g, '<span class="citation">[$1]</span>');
+}
+
+document.getElementById("formulaire").addEventListener("submit", async (evenement) => {
+  evenement.preventDefault();
+  const question = champQuestion.value.trim();
+  const cle = champCle.value;
+  if (!question || !cle) return;
+  try { sessionStorage.setItem(CLE_STOCKEE, cle); } catch (e) {}
+
+  bouton.disabled = true;
+  bloc.style.display = "none";
+  // L'app est en scale-to-zero : la premiere question d'une periode calme
+  // paie le reveil de la machine en plus de la generation.
+  afficherEtat("Recherche dans les supports, puis rédaction… (compter une " +
+               "quinzaine de secondes, plus si la machine dormait)", false);
+
+  try {
+    const reponse = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Key": cle },
+      body: JSON.stringify({ question }),
+    });
+    if (!reponse.ok) {
+      const detail = await reponse.text();
+      afficherEtat("Erreur " + reponse.status + " : " + detail.slice(0, 300), true);
+      return;
+    }
+    const donnees = await reponse.json();
+    document.getElementById("texte").innerHTML = rendre(donnees.answer);
+    document.getElementById("modele").textContent = donnees.model;
+    document.getElementById("trace").textContent = donnees.trace_id || "désactivée";
+    const liste = document.getElementById("sources");
+    liste.replaceChildren();
+    for (const source of donnees.sources) {
+      const element = document.createElement("li");
+      element.textContent = source.document;
+      const page = document.createElement("span");
+      page.className = "page";
+      page.textContent = source.page ? "  page " + source.page : "";
+      element.appendChild(page);
+      liste.appendChild(element);
+    }
+    afficherEtat("", false);
+    bloc.style.display = "block";
+  } catch (erreur) {
+    afficherEtat("Requête impossible : " + erreur.message, true);
+  } finally {
+    bouton.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

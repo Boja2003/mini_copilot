@@ -11,4 +11,6 @@ __pycache__/
 .ruff_cache/
 .idea/
 .vscode/
+# Configuration locale de l'app Claude (lancement du serveur de dev).
+.claude/
 .DS_Store

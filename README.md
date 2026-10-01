@@ -96,7 +96,30 @@ sous-processus. En production, sur Linux, la question ne se pose pas.
    Sans le header, tu dois obtenir un `401` — et l'appel ne part jamais
    chez Mistral, donc ton quota est protégé.
 
-3. Plus simple que curl : ouvre **http://localhost:8000/docs**.
+3. Plus simple que curl : ouvre **http://localhost:8000/** — l'interface —,
+   ou **/docs** pour l'API.
+
+### L'interface
+
+Une page, [`app/static/index.html`](app/static/index.html), servie telle
+quelle par `GET /` : une question, la réponse, ses sources et son
+`trace_id`. Trois décisions valent d'être dites.
+
+**La page n'est pas protégée par la clé, `/chat` l'est.** La page ne contient
+aucun secret ; la clé est saisie dans le navigateur et gardée dans
+`sessionStorage`, donc oubliée à la fermeture de l'onglet. L'écrire dans la
+page livrée reviendrait à la publier, puisque `/` est public.
+
+**La clé voyage en en-tête, jamais en paramètre d'URL** : un paramètre
+finirait dans les journaux d'accès de Fly et dans l'historique du navigateur.
+
+**La réponse du modèle est insérée comme du texte, pas comme du HTML.** Elle
+est échappée, puis on ne réintroduit que le gras et les citations `[n]`. Un
+RAG recopie des passages d'un corpus : traiter sa sortie comme du HTML de
+confiance serait une faille. Vérifié à la main dans un navigateur — une
+réponse contenant `<script>alert(1)</script>` s'affiche comme du texte —, et
+un test garde l'invariant qui le permet : tout ce qui part dans `innerHTML`
+passe d'abord par la fonction d'échappement.
 
 ## Le corpus
 
@@ -705,7 +728,7 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - [x] **Étape 6a** — déploiement continu : push sur `main` → tests, build,
       déploiement Fly, et contrôle de `/health` qui fait rougir la CI si
       l'app ne répond pas
-- [ ] **Étape 6b** — interface web minimale : poser une question, lire la
+- [x] **Étape 6b** — interface web minimale : poser une question, lire la
       réponse avec ses sources et son `trace_id`
 - [ ] **Étape 6c** — cache (latence et quota), modèle auto-hébergé
       (vLLM / Ollama)

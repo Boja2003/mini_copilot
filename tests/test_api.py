@@ -138,3 +138,45 @@ def test_cle_invalide_ne_touche_jamais_le_llm(
 
     monkeypatch.setattr(main, "generate_answer", ne_doit_pas_etre_appele)
     assert client.post("/chat", json={"question": "bonjour"}).status_code == 401
+
+
+def test_la_page_est_servie_sans_cle(client: TestClient) -> None:
+    # La page ne contient aucun secret : la proteger n'apporterait rien, et
+    # obligerait a poser la cle avant de pouvoir la saisir.
+    reponse = client.get("/")
+    assert reponse.status_code == 200
+    assert reponse.headers["content-type"].startswith("text/html")
+    assert "<title>mini_copilot</title>" in reponse.text
+
+
+def test_la_page_ne_contient_aucune_cle(client: TestClient) -> None:
+    # Garde-fou : la cle est saisie par l'utilisateur, jamais ecrite dans la
+    # page. Une cle en dur ici serait publiee a chaque deploiement.
+    page = client.get("/").text
+    assert CLE not in page
+    assert "sessionStorage" in page
+
+
+def test_la_page_appelle_chat_en_en_tete(client: TestClient) -> None:
+    # La cle doit voyager en en-tete, pas en parametre d'URL : un parametre
+    # finirait dans les journaux d'acces de Fly et du navigateur.
+    page = client.get("/").text
+    assert '"X-API-Key": cle' in page
+    assert "/chat?" not in page
+
+
+def test_la_page_echappe_avant_d_inserer(client: TestClient) -> None:
+    # Verification faite a la main dans un navigateur : une reponse contenant
+    # <script> s'affiche bien comme du texte. Ce test garde l'invariant qui
+    # le permet — le texte du modele passe par rendre(), qui echappe, et rien
+    # d'autre n'est affecte a innerHTML. Un RAG recopie des passages d'un
+    # corpus : sa sortie n'est pas du HTML de confiance.
+    page = client.get("/").text
+    assert 'replace(/&/g, "&amp;")' in page
+    assert 'replace(/</g, "&lt;")' in page
+    affectations = [
+        ligne.strip() for ligne in page.splitlines() if ".innerHTML" in ligne
+    ]
+    assert affectations, "le rendu de la reponse a change, revoir ce test"
+    for ligne in affectations:
+        assert "rendre(" in ligne, f"insertion HTML sans echappement : {ligne}"

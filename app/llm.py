@@ -22,7 +22,7 @@ from .retrieval import (
     construire_contexte,
 )
 
-__all__ = ["LLMError", "Reponse", "generate_answer"]
+__all__ = ["LLMError", "Reponse", "generate_answer", "nom_strategie"]
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,23 @@ _appeler_mistral = partial(appeler_chat, nom="llm-reponse")
 class Reponse:
     texte: str
     passages: list[Passage]
+
+
+def nom_strategie() -> str:
+    """Le nom de la strategie reellement employee, pour les traces.
+
+    Colle a _rechercher() ci-dessous, et volontairement juste a cote : la
+    couche HTTP nommait les traces « reecriture » ou « hybride », si bien
+    qu'apres l'activation de l'agent toutes les traces de production
+    portaient une etiquette fausse. Un nom qui vit loin du code qu'il decrit
+    finit par le decrire mal.
+    """
+    settings = get_settings()
+    if settings.agent_actif:
+        return "agent"
+    if settings.reecriture_requetes:
+        return "reecriture"
+    return "hybride"
 
 
 async def _rechercher(question: str) -> list[Passage]:

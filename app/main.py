@@ -5,16 +5,18 @@ traduire une panne en code HTTP correct. Aucune logique metier ici.
 """
 
 import logging
+import pathlib
 import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi.responses import FileResponse
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from .config import get_settings
 from .db import close_pool, init_schema, open_pool
-from .llm import generate_answer
+from .llm import generate_answer, nom_strategie
 from .mistral import LLMError, close_client
 from .observabilite import (
     attributs_de_trace,
@@ -105,6 +107,22 @@ app = FastAPI(
 )
 
 
+PAGE = pathlib.Path(__file__).parent / "static" / "index.html"
+
+
+@app.get("/", include_in_schema=False)
+async def page() -> FileResponse:
+    """L'interface : une page, servie telle quelle.
+
+    NON protegee par la cle, et c'est volontaire — la page ne contient aucun
+    secret. La cle est saisie dans le navigateur, gardee dans sessionStorage
+    (donc oubliee a la fermeture de l'onglet) et envoyee en en-tete a /chat,
+    qui reste le seul endpoint couteux et le seul protege. Mettre la cle dans
+    la page livree reviendrait a la publier.
+    """
+    return FileResponse(PAGE, media_type="text/html")
+
+
 @app.get("/health", tags=["infra"])
 async def health() -> dict[str, str]:
     """Sonde de liveness : pas d'appel externe, doit toujours repondre vite.
@@ -121,7 +139,7 @@ async def health() -> dict[str, str]:
 )
 async def chat(request: ChatRequest) -> ChatResponse:
     settings = get_settings()
-    strategie = "reecriture" if settings.reecriture_requetes else "hybride"
+    strategie = nom_strategie()
 
     # La trace ne commence qu'APRES l'authentification (dependance ci-dessus) :
     # une requete refusee ne produit pas de trace, donc pas de bruit ni de
