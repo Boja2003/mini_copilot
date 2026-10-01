@@ -481,6 +481,56 @@ sur GitHub. `.env.example` est le modèle versionné, sans secret. En
 production, les clés sont fournies comme variables d'environnement
 (`fly secrets set`) — jamais dans l'image ni dans `fly.toml`.
 
+Deux clés distinctes, à ne pas confondre : `MISTRAL_API_KEY` paie les appels
+au modèle, `API_KEY` protège `/chat`. La seconde est propre à ce service, et
+celle de ton `.env` local n'est pas forcément celle de la production.
+
+### Récupérer ou faire tourner la clé de service
+
+Les secrets Fly sont en **écriture seule** : `fly secrets list` n'affiche que
+des empreintes, et il n'existe pas de `fly secrets get`. La valeur reste
+lisible dans la machine en vol, où elle est posée comme variable
+d'environnement :
+
+```bash
+fly machine start <ID> --app mini-copilot     # scale-to-zero : la réveiller d'abord
+fly ssh console --app mini-copilot -C "printenv API_KEY"
+```
+
+`fly ssh console` ne démarre pas la machine lui-même et échoue sur
+`app ... has no started VMs` si elle dort ; `fly status` donne l'identifiant.
+
+Si la clé est perdue ou suspecte, la faire tourner est plus sain que de la
+relire — l'ancienne cesse d'être valable :
+
+```bash
+fly secrets set API_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))") --app mini-copilot
+```
+
+Les machines redémarrent (une dizaine de secondes) et tout client gardant
+l'ancienne clé prend un `401`. Garde la valeur affichée : ensuite, elle ne se
+relit que par la méthode précédente.
+
+### Interroger `/chat` depuis PowerShell
+
+`curl` y est un alias d'`Invoke-WebRequest`, qui ne connaît pas `-H` ; et
+PowerShell 5.1 retire les guillemets doubles d'un corps JSON passé à
+`curl.exe`, ce qui donne un `422 json_invalid`. La voie sans piège :
+
+```powershell
+$cle = "<la cle de service>"
+$corps = @{ question = "Compare le parcours en largeur et le parcours en profondeur ?" } | ConvertTo-Json
+$r = Invoke-RestMethod -Uri https://mini-copilot.fly.dev/chat -Method Post `
+  -ContentType "application/json" -Headers @{ "X-API-Key" = $cle } `
+  -Body $corps -TimeoutSec 150
+$r.sources | Format-Table document, page
+$r.answer
+```
+
+Les accents d'une réponse s'affichent en `Ã¨` tant que la console décode en
+cp1252 : `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` le
+corrige pour la session. C'est l'affichage, pas la donnée.
+
 ## Dépannage
 
 ### `502` avec `LLM HTTP 429 ... quota epuise pour CE modele`
@@ -568,6 +618,35 @@ Puis :
 fly deploy
 ```
 
+### Déploiement continu
+
+Depuis l'étape 6, **`fly deploy` à la main n'est plus la voie normale** : un
+push sur `main` déclenche le déploiement, et seulement si les tests, `ruff`
+et le build Docker sont passés ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Le job `deploy` ne tourne ni sur les pull requests ni sur les autres
+branches.
+
+Deux détails qui comptent :
+
+- **La CI ne peut pas rester verte sur une app cassée.** Après le
+  déploiement, le workflow appelle `/health` et passe au rouge s'il ne
+  répond pas. L'app étant en scale-to-zero, il réessaie cinq fois à dix
+  secondes d'intervalle : le premier appel ne fait que la réveiller.
+- **Deux déploiements simultanés ne se chevauchent pas** (`concurrency`), et
+  le second n'annule pas le premier : un déploiement Fly interrompu laisse
+  les machines dans un état indéterminé.
+
+Il faut un jeton de déploiement Fly, stocké comme secret GitHub. À faire une
+fois, et le jeton ne doit jamais s'afficher ailleurs que dans ton terminal :
+
+```bash
+fly tokens create deploy | gh secret set FLY_API_TOKEN --repo Boja2003/mini_copilot
+```
+
+Un jeton `deploy` ne peut que déployer cette app : il ne lit pas les secrets
+et ne touche pas au reste du compte Fly. Pour le révoquer :
+`fly tokens list` puis `fly tokens revoke <ID>`.
+
 ### Vérifier le déploiement
 
 ```bash
@@ -608,9 +687,6 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
   LLM plus capable que les modèles 3B/8B accessibles sur ce compte.
 - Le générateur du guide PDF (`docs/`) n'est pas versionné : le guide décrit
   l'état antérieur à l'étape 3 et ne peut pas être régénéré tel quel.
-- Deux machines Fly alors qu'une suffirait (`fly scale count 1`).
-- Les actions GitHub `checkout@v4` et `setup-python@v5` sont signalées comme
-  dépréciées (Node.js 20).
 - Les formules mathématiques sont mutilées par l'extraction PDF.
 
 ## Suite
@@ -626,4 +702,10 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - [x] **Étape 5** — couche agent : décomposition en aspects, une recherche
       par aspect, entrelacement. Orchestration maison, sans LangGraph —
       le graphe tient en trois fonctions et reste lisible dans les traces
-- [ ] **Étape 6** — CD, cache Redis, modèle auto-hébergé (vLLM / Ollama)
+- [x] **Étape 6a** — déploiement continu : push sur `main` → tests, build,
+      déploiement Fly, et contrôle de `/health` qui fait rougir la CI si
+      l'app ne répond pas
+- [ ] **Étape 6b** — interface web minimale : poser une question, lire la
+      réponse avec ses sources et son `trace_id`
+- [ ] **Étape 6c** — cache (latence et quota), modèle auto-hébergé
+      (vLLM / Ollama)

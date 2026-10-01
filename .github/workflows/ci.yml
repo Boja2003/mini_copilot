@@ -5,12 +5,17 @@ on:
     branches: [main]
   pull_request:
 
+# Par defaut, le token d'un workflow peut ecrire dans le depot. Aucun job
+# ici n'en a besoin : on reduit la permission au strict necessaire.
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           cache: pip
@@ -22,5 +27,44 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      # Fly construit sur ses propres serveurs : ce build-ci ne sert donc pas
+      # au deploiement, mais il casse vite et clairement si le Dockerfile est
+      # en faute, sans attendre la fin du deploiement.
       - run: docker build -t rag-assistant:ci .
+
+  deploy:
+    # Le dernier maillon : jusqu'ici la CI testait, et le deploiement se
+    # faisait a la main depuis un poste. Les deux pouvaient diverger.
+    needs: [quality, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Deux deploiements simultanes se marcheraient dessus (Fly prend un bail
+    # sur chaque machine). On ne les annule pas pour autant : un deploiement
+    # interrompu laisse l'app dans un etat indetermine.
+    concurrency:
+      group: deploiement-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # Un deploiement « reussi » qui laisse l'app en vrac doit passer au
+      # rouge. L'app est en scale-to-zero : la premiere requete la reveille,
+      # d'ou les tentatives espacees plutot qu'un seul appel.
+      - name: Verifier que l'app repond
+        run: |
+          for tentative in 1 2 3 4 5; do
+            if curl -fsS --max-time 60 https://mini-copilot.fly.dev/health; then
+              echo ""
+              echo "OK a la tentative $tentative"
+              exit 0
+            fi
+            echo "pas encore prete (tentative $tentative), nouvelle tentative dans 10 s"
+            sleep 10
+          done
+          echo "::error::/health ne repond pas apres le deploiement"
+          exit 1
