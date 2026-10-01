@@ -56,10 +56,10 @@ fichier ──► parsers.py ──► chunking.py ──► embeddings.py ─�
 | `app/mistral.py` | Client HTTP partagé et appel chat vers Mistral. |
 | `app/observabilite.py` | Traces Langfuse : le seul module qui parle au SDK. |
 | `app/config.py` | Config et secrets, lus depuis l'environnement. |
-| `eval/` | Golden set, métriques, mesures et synthèse. |
+| `eval/` | Golden set, métriques, mesures du retrieval et de la génération. |
 | `Dockerfile` | Empaquetage : la fin du « ça marche chez moi ». |
 | `docker-compose.yml` | L'API et sa base Postgres + pgvector. |
-| `tests/` | 74 tests sans réseau : LLM, embeddings, base et traces doublés. |
+| `tests/` | 91 tests sans réseau : LLM, embeddings, base et traces doublés. |
 
 ## Démarrer en local
 
@@ -136,6 +136,11 @@ Relevé sur 15 documents (6 PDF, 9 PPTX) → **1076 chunks** :
 
 ## Évaluation
 
+Deux mesures distinctes, et c'est volontaire : **le retrieval** (les bons
+passages arrivent-ils sous les yeux du modèle ?) puis **la génération** (que
+fait le modèle de ces passages ?). Séparer les deux permet d'imputer un
+défaut à l'un ou à l'autre.
+
 ### Pourquoi des métriques sans LLM (et pas Ragas)
 
 Si le golden set dit « la réponse est dans `III. Breadth first search` »,
@@ -146,8 +151,9 @@ calcul est déterministe.
 Ragas juge surtout la *génération* avec un LLM qui découpe la réponse en
 affirmations puis vérifie chacune. Sur ce compte, les seuls modèles ouverts
 font 3 à 8 milliards de paramètres : un juge de cette taille donne des scores
-bruités et des sorties JSON illisibles. L'évaluation de la génération reste
-à faire, avec un juge adapté.
+bruités et des sorties JSON illisibles. La génération est donc mesurée par
+des contrôles déterministes (voir plus bas) ; un juge viendra quand un modèle
+plus capable sera accessible.
 
 ### Le golden set
 
@@ -179,17 +185,25 @@ système. **Ce sont tes vraies questions de révision qui comptent** : ajoute-le
 ```bash
 python -m eval.retrieval --nom essai --strategie hybride
 python -m eval.retrieval --nom essai-reecriture --strategie reecriture --comparer essai
+python -m eval.synthese --groupe hybride=h-r1,h-r2 --groupe reecriture=r-r1,r-r2,r-r3
 ```
 
 ```bash
-python -m eval.synthese --groupe hybride=h-r1,h-r2 --groupe reecriture=r-r1,r-r2,r-r3
+python -m eval.generation --nom base            # interroge le modèle
+python -m eval.generation --nom base-v2 --rejouer base   # recalcule sans appel
 ```
 
 Chaque résultat (`eval/resultats/<nom>.json`) enregistre le commit (suffixé
 `+modifications` si le code n'était pas commité), l'empreinte du golden set,
-les paramètres, la latence, et pour chaque question les requêtes lancées et
-les passages renvoyés. `eval.synthese` refuse de comparer des mesures notées
-avec des golden sets différents.
+les paramètres, la latence, et pour chaque question les requêtes lancées, les
+passages renvoyés et, pour la génération, la réponse complète.
+`eval.synthese` refuse de comparer des mesures notées avec des golden sets
+différents.
+
+**`--rejouer` recalcule les contrôles sur des réponses déjà enregistrées**,
+sans redemander une seule réponse au modèle : quand un contrôle évolue, on
+remesure sans consommer de quota et sans réintroduire la variabilité du
+modèle, donc l'écart observé vient bien du contrôle corrigé.
 
 L'historique du dépôt a été réécrit avant publication (adresse e-mail de
 l'auteur) : les identifiants de commit enregistrés dans les résultats
@@ -212,8 +226,11 @@ fait le lien.
 - **Un document retiré du dossier reste indexé**, et il pèse sur les
   résultats : sur une première mesure, 2 des 4 régressions de la réécriture
   venaient d'un livre alors absent du dossier corpus.
+- **Un contrôle d'évaluation se teste comme du code.** Le contrôle des
+  citations a connu deux versions fausses avant d'être juste (voir plus bas) :
+  une mesure fausse est pire qu'une absence de mesure, parce qu'elle rassure.
 
-### Résultats
+### Résultats — le retrieval
 
 Mesures répétées sur le golden set `7be5592d2ef6`, stratégies alternées dans
 le temps. 58 questions avec réponse attendue, dont 20 en français à termes
@@ -234,6 +251,46 @@ Ce qui est établi (étendues disjointes) :
 - elle coûte ~0.7 à ~0.9 s de retrieval en médiane ;
 - **entre `8b` et `3b`, seule la latence diffère** (`3b` plus rapide d'environ
   230 ms) : aucune différence de qualité n'est établie.
+
+### Résultats — la génération
+
+Quatre contrôles déterministes (`eval/generation.py`), sur les 63 questions,
+avec les réglages de production. Chacun attrape un défaut précis :
+
+| Contrôle | Ce qu'il attrape | Résultat |
+|---|---|---|
+| Citations valides | un `[7]` alors que 5 passages ont été fournis | **1.000** (60 réponses citent) |
+| Réponse sourcée | une réponse plausible mais invérifiable, sans citation | **1.000** (58) |
+| Refus correct | une question hors-sujet à laquelle le modèle répond quand même | **1.000** (5/5) |
+| Refus injustifié | un refus alors que le bon passage était dans son contexte | **0.000** (0/58) |
+
+Latence de bout en bout : médiane 7,6 s, 90ᵉ centile 14,6 s.
+
+Deux règles de comptage évitent de fabriquer de faux succès : **une réponse
+qui ne cite rien ne peut pas citer faux** (le contrôle ne s'applique qu'aux
+réponses qui citent), et **un refus n'a pas à citer ses sources**.
+
+**Le contrôle des citations a été faux deux fois avant d'être juste.** Les
+deux erreurs venaient de vraies réponses, et aucune n'aurait été visible sans
+relire le texte :
+
+1. La première version n'acceptait que des crochets purement numériques. Or
+   le modèle écrit souvent `[1, p. 7]`. Résultat : une réponse correctement
+   sourcée classée « sans source », et surtout un angle mort — une citation
+   inventée écrite `[7, p. 3]` serait passée inaperçue.
+2. La deuxième lisait le contenu des crochets, et comptait alors les
+   **intervalles mathématiques** : `\([0, 1]\)` dans la définition d'un
+   ensemble convexe devenait une « citation hors bornes ». Sur un corpus
+   d'optimisation convexe et de recherche par section dorée, les intervalles
+   sont partout.
+
+Version actuelle : les crochets encadrés de délimiteurs mathématiques sont
+ignorés, le zéro n'est jamais une citation (les passages sont numérotés à
+partir de 1), et seuls les éléments entièrement numériques comptent.
+
+Hors de portée sans juge LLM, et assumé : **la fidélité fine** — la phrase
+citée dit-elle vraiment ce que la réponse lui fait dire ? — et l'exactitude
+du contenu.
 
 ### Réécriture de requête
 
@@ -450,6 +507,8 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - L'ingestion **ne supprime pas** un document dont le fichier a disparu.
 - Le golden set est rédigé par le constructeur du système : à enrichir avec
   de vraies questions de révision.
+- La **fidélité fine** des réponses n'est pas mesurée : il y faudrait un juge
+  LLM plus capable que les modèles 3B/8B accessibles sur ce compte.
 - Le générateur du guide PDF (`docs/`) n'est pas versionné : le guide décrit
   l'état antérieur à l'étape 3 et ne peut pas être régénéré tel quel.
 - Deux machines Fly alors qu'une suffirait (`fly scale count 1`).
@@ -465,7 +524,7 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - [x] **Étape 3** — observabilité Langfuse, chaque requête tracée
 - [x] **Étape 4** — golden set, métriques de retrieval, réécriture mesurée
 - [x] **Dépôt publié** sur GitHub, CI active
-- [ ] **Étape 4b** — évaluation de la génération : citations valides, refus du
-      hors-sujet, fidélité aux passages
+- [x] **Étape 4b** — évaluation de la génération : citations, sources, refus
+- [ ] **Étape 4c** — fidélité fine, avec un juge LLM plus capable
 - [ ] **Étape 5** — couche agent (LangGraph) pour le multi-étapes
 - [ ] **Étape 6** — CD, cache Redis, modèle auto-hébergé (vLLM / Ollama)

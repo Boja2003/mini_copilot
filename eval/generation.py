@@ -26,6 +26,7 @@ dit-elle vraiment ce que la reponse lui fait dire ?) et l'exactitude.
 Usage :
     python -m eval.generation --nom base
     python -m eval.generation --nom essai --limite 10
+    python -m eval.generation --nom base-v2 --rejouer base
 """
 
 import argparse
@@ -33,6 +34,7 @@ import asyncio
 import datetime as dt
 import json
 import logging
+import pathlib
 import re
 import sys
 import time
@@ -61,7 +63,13 @@ logging.basicConfig(level=logging.WARNING)
 # reformule parfois la ponctuation autour, jamais ces quelques mots.
 MARQUEUR_REFUS = "je ne trouve pas"
 
-CITATION = re.compile(r"\[(\d{1,2})\]")
+# Le modele cite « [1] », mais aussi « [1, p. 7] » ou « [2, 5] ». On lit donc
+# le CONTENU de chaque crochet, et on n'y garde que les elements entierement
+# numeriques : dans « [2, p. 10] », le 10 est un numero de page, le compter
+# inventerait une citation hors bornes. Premiere version de ce controle :
+# elle n'acceptait que des crochets purement numeriques, et classait une
+# reponse correctement sourcee comme non sourcee.
+CROCHETS = re.compile(r"\[([^\[\]]{1,40})\]")
 
 
 def normaliser(texte: str) -> str:
@@ -69,9 +77,35 @@ def normaliser(texte: str) -> str:
     return "".join(c for c in sans_accents if not unicodedata.combining(c)).casefold()
 
 
+# Delimiteurs de mathematiques en ligne. Le modele ecrit des intervalles
+# \([0, 1]\) ou $[a, b]$ : ce ne sont pas des citations.
+AVANT_MATH = ("\(", "$")
+APRES_MATH = ("\)", "$")
+
+
 def extraire_citations(texte: str) -> set[int]:
-    """Les numeros de passage cites dans la reponse, par exemple [2]."""
-    return {int(n) for n in CITATION.findall(texte)}
+    r"""Les numeros de passage cites dans la reponse, par exemple [2].
+
+    Deux pieges, rencontres l'un et l'autre sur de vraies reponses :
+      - « [1, p. 7] » cite le passage 1, pas les passages 1 et 7 ;
+      - « \([0, 1]\) » est un intervalle mathematique. Le corpus porte sur
+        l'optimisation convexe et la recherche par section doree : les
+        intervalles y sont partout, et les compter inventerait des
+        citations hors bornes sur des reponses correctes.
+    """
+    numeros = set()
+    for crochet in CROCHETS.finditer(texte):
+        avant = texte[max(0, crochet.start() - 2) : crochet.start()]
+        apres = texte[crochet.end() : crochet.end() + 2]
+        if avant.endswith(AVANT_MATH) or apres.startswith(APRES_MATH):
+            continue
+        for element in crochet.group(1).split(","):
+            element = element.strip()
+            # Les passages sont numerotes a partir de 1 : un 0 vient d'une
+            # borne d'intervalle, jamais d'une citation.
+            if element.isdigit() and int(element) >= 1:
+                numeros.add(int(element))
+    return numeros
 
 
 def est_un_refus(texte: str) -> bool:
@@ -115,13 +149,25 @@ def evaluer_reponse(
     return resultat
 
 
+def _marques(ligne: dict) -> str:
+    marques = ""
+    if ligne.get("citations_hors_bornes"):
+        marques += " CITATION-HORS-BORNES"
+    if ligne.get("refus_injustifie"):
+        marques += " REFUS-INJUSTIFIE"
+    if ligne.get("refus_correct") is False:
+        marques += " PAS-DE-REFUS"
+    if ligne.get("cite_une_source") is False:
+        marques += " SANS-SOURCE"
+    return marques
+
+
 async def interroger(questions: list[dict], limite: int | None) -> list[dict]:
     lignes = []
     for q in questions[: limite or len(questions)]:
         debut = time.perf_counter()
         try:
             reponse = await generate_answer(q["question"])
-            erreur = None
         except LLMError as exc:
             # Une panne sur une question ne doit pas perdre les 62 autres.
             print(f"  ! {q['id']} : {exc}", flush=True)
@@ -145,22 +191,13 @@ async def interroger(questions: list[dict], limite: int | None) -> list[dict]:
             "passages": [
                 {"document": p.titre, "page": p.page} for p in reponse.passages
             ],
-            "erreur": erreur,
+            "erreur": None,
         }
         ligne |= evaluer_reponse(
             reponse.texte, documents_fournis, q.get("documents") or []
         )
         lignes.append(ligne)
-
-        marques = ""
-        if ligne.get("citations_hors_bornes"):
-            marques += " CITATION-HORS-BORNES"
-        if ligne.get("refus_injustifie"):
-            marques += " REFUS-INJUSTIFIE"
-        if ligne.get("refus_correct") is False:
-            marques += " PAS-DE-REFUS"
-        if ligne.get("cite_une_source") is False:
-            marques += " SANS-SOURCE"
+        marques = _marques(ligne)
         print(f"  {'x' if marques else '.'} {q['id']}{marques}", flush=True)
     return lignes
 
@@ -176,7 +213,7 @@ CONTROLES = [
 def agreger(lignes: list[dict]) -> dict:
     par_cat: dict[str, list[dict]] = defaultdict(list)
     for ligne in lignes:
-        if "erreur" in ligne and ligne["erreur"]:
+        if ligne.get("erreur"):
             continue
         par_cat[ligne["categorie"]].append(ligne)
         par_cat["TOUTES"].append(ligne)
@@ -208,7 +245,7 @@ def afficher(agregats: dict) -> None:
             cellules.append(
                 f"{'-':>20}"
                 if valeur is None
-                else f"{valeur['taux']:.3f} (n={valeur['n']}){'':>5}"[:20].rjust(20)
+                else f"{valeur['taux']:.3f} (n={valeur['n']})".rjust(20)
             )
         print(f"{cat:<12} {m['n']:>3} " + " ".join(cellules))
 
@@ -228,21 +265,9 @@ def afficher_defauts(lignes: list[dict]) -> None:
         print(f"  {libelle:<30} {len(concernees):>2} : {', '.join(concernees) or '-'}")
 
 
-async def principal(nom: str, limite: int | None) -> None:
-    questions = charger_golden_set()
-    settings = get_settings()
-    await open_pool()
-    try:
-        print(
-            f"{min(limite or len(questions), len(questions))} questions, "
-            f"modele {settings.mistral_model}, "
-            f"reecriture {'active' if settings.reecriture_requetes else 'inactive'}"
-        )
-        lignes = await interroger(questions, limite)
-    finally:
-        await close_pool()
-        await close_client()
-
+def enregistrer(
+    nom: str, lignes: list[dict], parametres: dict, supplement: dict | None = None
+) -> pathlib.Path:
     agregats = agreger(lignes)
     afficher(agregats)
     print("\nDefauts, question par question :")
@@ -264,12 +289,9 @@ async def principal(nom: str, limite: int | None) -> None:
         "date": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
         "commit": commit_courant(),
         "golden_set": empreinte_golden_set(),
-        "parametres": {
-            "modele": settings.mistral_model,
-            "reecriture_requetes": settings.reecriture_requetes,
-            "modele_reecriture": settings.mistral_reecriture_model,
-        },
+        "parametres": parametres,
         "latence_ms": latence,
+        **(supplement or {}),
         "agregats": agregats,
         "questions": lignes,
     }
@@ -281,19 +303,107 @@ async def principal(nom: str, limite: int | None) -> None:
         f"\nLatence : mediane {latence.get('mediane')} ms, p90 {latence.get('p90')} ms"
     )
     print(f"Resultats : {chemin}")
+    return chemin
+
+
+def rejouer(source_nom: str, nom: str) -> None:
+    """Recalcule les controles sur des reponses deja enregistrees.
+
+    Les reponses du modele sont conservees dans le fichier de resultats.
+    Quand un controle evolue — la lecture des citations, d'abord trop stricte
+    pour « [1, p. 7] » —, on remesure sans redemander une seule reponse :
+    aucun quota consomme, et aucune variabilite du modele introduite entre
+    les deux mesures, donc l'ecart observe vient bien du controle corrige.
+    """
+    chemin = RESULTATS / f"generation-{source_nom}.json"
+    source = json.loads(chemin.read_text(encoding="utf-8"))
+    attendus_par_id = {
+        q["id"]: (q.get("documents") or []) for q in charger_golden_set()
+    }
+
+    lignes = []
+    for ancienne in source["questions"]:
+        if ancienne.get("erreur"):
+            lignes.append(ancienne)
+            continue
+        ligne = {
+            cle: ancienne[cle]
+            for cle in (
+                "id",
+                "categorie",
+                "question",
+                "duree_ms",
+                "reponse",
+                "passages",
+                "erreur",
+            )
+            if cle in ancienne
+        }
+        ligne |= evaluer_reponse(
+            ancienne["reponse"],
+            [p["document"] for p in ancienne.get("passages", [])],
+            attendus_par_id.get(ancienne["id"], []),
+        )
+        lignes.append(ligne)
+        marques = _marques(ligne)
+        if marques:
+            print(f"  x {ligne['id']}{marques}", flush=True)
+
+    print(f"{len(lignes)} reponses rejouees depuis « {source_nom} »")
+    enregistrer(
+        nom,
+        lignes,
+        source.get("parametres", {}),
+        {"rejoue_depuis": source_nom, "date_des_reponses": source.get("date")},
+    )
+
+
+async def principal(nom: str, limite: int | None) -> None:
+    questions = charger_golden_set()
+    settings = get_settings()
+    await open_pool()
+    try:
+        print(
+            f"{min(limite or len(questions), len(questions))} questions, "
+            f"modele {settings.mistral_model}, "
+            f"reecriture {'active' if settings.reecriture_requetes else 'inactive'}"
+        )
+        lignes = await interroger(questions, limite)
+    finally:
+        await close_pool()
+        await close_client()
+
+    enregistrer(
+        nom,
+        lignes,
+        {
+            "modele": settings.mistral_model,
+            "reecriture_requetes": settings.reecriture_requetes,
+            "modele_reecriture": settings.mistral_reecriture_model,
+        },
+    )
 
 
 if __name__ == "__main__":
     parseur = argparse.ArgumentParser(description="Evaluation de la generation")
     parseur.add_argument("--nom", required=True, help="nom du fichier de resultats")
     parseur.add_argument("--limite", type=int, help="n'interroger que les N premieres")
+    parseur.add_argument(
+        "--rejouer",
+        metavar="SOURCE",
+        help="recalculer les controles sur les reponses deja enregistrees",
+    )
     args = parseur.parse_args()
-    # Comme l'evaluation du retrieval : pas de trace, le temps d'envoi
-    # fausserait la latence et le projet Langfuse se remplirait de mesures.
-    desactiver_traces()
-    configurer_boucle()
     try:
-        asyncio.run(principal(args.nom, args.limite))
-    except ValueError as exc:
+        if args.rejouer:
+            # Aucun appel au modele ni a la base : pas de boucle a configurer.
+            rejouer(args.rejouer, args.nom)
+        else:
+            # Comme l'evaluation du retrieval : pas de trace, le temps d'envoi
+            # fausserait la latence et remplirait le projet Langfuse.
+            desactiver_traces()
+            configurer_boucle()
+            asyncio.run(principal(args.nom, args.limite))
+    except (ValueError, FileNotFoundError) as exc:
         print(f"ERREUR : {exc}", file=sys.stderr)
         sys.exit(1)

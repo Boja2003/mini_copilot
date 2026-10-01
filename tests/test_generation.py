@@ -20,6 +20,28 @@ def test_extraire_citations() -> None:
     assert extraire_citations("Voir [1] et encore [1].") == {1}
 
 
+def test_citation_avec_numero_de_page() -> None:
+    # Cas rencontre en production : le modele ajoute la page dans le crochet.
+    # La premiere version du controle ne voyait aucune citation ici, et
+    # classait une reponse correctement sourcee comme non sourcee.
+    assert extraire_citations("D'apres [1, p. 7], l'ACP sert a...") == {1}
+    assert extraire_citations("Voir [1, p. 1] et [3, p. 7].") == {1, 3}
+
+
+def test_le_numero_de_page_n_est_pas_une_citation() -> None:
+    # Le 10 est une page, pas un passage : le compter inventerait une
+    # citation hors bornes sur une reponse pourtant correcte.
+    assert extraire_citations("D'apres [2, p. 10]") == {2}
+
+
+def test_plusieurs_passages_dans_un_crochet() -> None:
+    assert extraire_citations("Les statistiques [2, 5] le montrent.") == {2, 5}
+
+
+def test_lien_markdown_ignore() -> None:
+    assert extraire_citations("Voir [la documentation](https://exemple.fr).") == set()
+
+
 def test_reconnaitre_un_refus() -> None:
     assert est_un_refus("Je ne trouve pas la réponse dans tes supports de cours.")
     # Accents et casse ne doivent pas faire rater le refus.
@@ -33,6 +55,16 @@ def test_citation_hors_bornes_detectee() -> None:
         "D'apres [1] et [3]", PASSAGES, ["III. Breadth first search"]
     )
     assert resultat["citations_hors_bornes"] == [3]
+    assert resultat["citations_valides"] is False
+
+
+def test_citation_hors_bornes_avec_page() -> None:
+    # L'angle mort de la premiere version : une citation inventee ecrite
+    # avec un numero de page passait inapercue.
+    resultat = evaluer_reponse(
+        "D'apres [7, p. 3]", PASSAGES, ["III. Breadth first search"]
+    )
+    assert resultat["citations_hors_bornes"] == [7]
     assert resultat["citations_valides"] is False
 
 
@@ -91,3 +123,22 @@ def test_refus_non_imputable_si_le_bon_passage_manquait() -> None:
         ["IX Coloring"],
     )
     assert "refus_injustifie" not in resultat
+
+
+def test_intervalle_mathematique_ignore() -> None:
+    # Cas rencontres en production, sur l'ensemble convexe et la section
+    # doree : les crochets y notent des intervalles, pas des citations.
+    assert extraire_citations(r"pour tout \(\lambda\) dans \([0, 1]\)") == set()
+    assert extraire_citations("l'intervalle $[1, 2]$ est ferme") == set()
+    # Une borne non entiere ne doit evidemment pas devenir une citation.
+    assert extraire_citations(r"\([0, 0.618]\)") == set()
+
+
+def test_zero_n_est_jamais_une_citation() -> None:
+    # Les passages sont numerotes a partir de 1.
+    assert extraire_citations("[0]") == set()
+
+
+def test_citations_et_intervalles_melanges() -> None:
+    texte = r"D'apres [2], sur l'intervalle \([0, 1]\), voir aussi [1, p. 4]."
+    assert extraire_citations(texte) == {1, 2}
