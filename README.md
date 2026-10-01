@@ -229,6 +229,21 @@ fait le lien.
 - **Un contrôle d'évaluation se teste comme du code.** Le contrôle des
   citations a connu deux versions fausses avant d'être juste (voir plus bas) :
   une mesure fausse est pire qu'une absence de mesure, parce qu'elle rassure.
+- **Un repli silencieux fausse une mesure plus sûrement qu'une panne.** La
+  première mesure de la couche agent annonçait un beau gain. En réalité la
+  décomposition était tombée en repli **14 fois sur 14** : le modèle renvoyait
+  une liste d'objets au lieu d'une liste de chaînes, le filtre la vidait sans
+  rien dire, et l'agent cherchait avec la question brute. Le gain mesuré
+  existait, mais il n'était pas le sien. Depuis : une sortie non conforme lève
+  une erreur (donc un avertissement dans les journaux), les sous-questions
+  réellement lancées sont enregistrées, et les agrégats comptent les replis
+  (`question_brute`) — si ce compteur ne vaut pas 0, les chiffres ne parlent
+  pas de ce qu'on croit.
+- **Une comparaison a besoin d'un témoin.** Ce repli a été invisible parce que
+  la mesure opposait deux variantes sans bras neutre. L'évaluation multi-sauts
+  a maintenant trois bras, dont la recherche simple sur la question brute :
+  elle sépare ce que l'agent doit à sa décomposition de ce qu'il doit au seul
+  fait de ne pas fusionner par RRF.
 
 ### Résultats — le retrieval
 
@@ -307,6 +322,79 @@ Trois garde-fous :
 - **aucun exemple du golden set dans le prompt** (un test le vérifie) : y
   écrire « parcours en largeur → breadth-first search » soufflerait la
   réponse à la question d'évaluation, et le score ne mesurerait plus rien.
+
+### Couche agent (étape 5)
+
+`AGENT_ACTIF=true` découpe la question en 2 ou 3 **aspects**, lance une
+recherche hybride complète par aspect, puis **entrelace** les classements.
+
+Le golden set à un saut ne pouvait rien en dire : il y plafonne à 1.000. D'où
+un second golden set, [`eval/golden_set_multisauts.yaml`](eval/golden_set_multisauts.yaml),
+de 14 questions ayant chacune plusieurs **faces** — des éléments distincts
+qu'une bonne réponse doit couvrir. Comparer Dijkstra et Bellman demande les
+pages de l'un **et** celles de l'autre, à trente pages d'écart dans le même
+document. Une face est couverte dès qu'un passage renvoyé tombe sur l'une de
+ses pages.
+
+```bash
+python -m eval.multisauts --nom temoin --strategie simple
+python -m eval.multisauts --nom agent --strategie agent --comparer temoin
+```
+
+Trois bras, mêmes étiquettes, golden set `43e335f2e52a` :
+
+| | couverture | questions complètes | `question_brute` | latence médiane |
+|---|---|---|---|---|
+| production (réécriture + RRF) | 0.821 | 9 / 14 | 0 | 873 ms |
+| témoin (question brute) | 0.857 | 10 / 14 | 14 | 239 ms |
+| **agent** | **0.964** | **13 / 14** | 0 | 1629 ms |
+
+Deux résultats, et le second est le plus instructif :
+
+1. **L'agent couvre 13 questions sur 14**, contre 10 pour le témoin et 9 pour
+   la configuration de production. Le seul échec restant est
+   `lagrangien-et-kkt` : les trois sous-questions générées parlaient toutes de
+   KKT, la décomposition a dérivé vers la seconde notion d'une question en
+   « comment passe-t-on de A à B ».
+2. **La réécriture + RRF, excellente à un saut, nuit en multi-sauts** : elle
+   fait moins bien que la recherche brute. RRF récompense le consensus, donc
+   l'aspect dominant de la question. C'est exactement pourquoi l'agent
+   entrelace au lieu de fusionner.
+
+Garde-fous, comme pour la réécriture :
+- une panne de la décomposition retombe sur la recherche simple, jamais sur
+  une erreur de `/chat` — mais ce repli est désormais visible dans les
+  journaux, dans les traces et dans les agrégats ;
+- le nombre de sous-questions est borné à 3 : chacune coûte une recherche
+  complète, le modèle ne décide pas de la facture ;
+- aucun exemple du corpus ni des golden sets dans le prompt (un test le
+  vérifie).
+
+**Ce que l'agent coûte sur les questions à un saut**, mesuré sur les 58
+questions du golden set principal (`eval/resultats/agent-1saut.json`) :
+
+| | Hit@5 | MRR | Precision@5 | Hit page@5 | latence médiane |
+|---|---|---|---|---|---|
+| production (réécriture 3b) | 1.000 | 0.991 | 0.914 | 0.964 | 973 ms |
+| agent | 1.000 | 0.987 | 0.869 | 0.893 | 1663 ms |
+
+Aucune question perdue, mais les cinq places du contexte sont diluées : l'agent
+en dépense sur des aspects que ces questions n'ont pas.
+
+Cette dilution ne se traduit par **aucun défaut de génération**. Les quatre
+contrôles de l'étape 4b, rejoués sur les 63 questions avec l'agent actif
+(`eval/resultats/generation-agent.json`) :
+
+| | citations valides | réponse sourcée | refus correct | refus injustifié | latence médiane |
+|---|---|---|---|---|---|
+| production | 1.000 | 1.000 | 1.000 | 0.000 | 7610 ms |
+| agent | 1.000 | 1.000 | 1.000 | 0.000 | 9615 ms |
+
+**Décision : activable, et le seul coût réel est la latence** (+2,0 s, +26 %).
+Aucune perte mesurée côté retrieval (Hit@5 inchangé à 1.000) ni côté
+génération, contre 4 questions multi-sauts gagnées sur 14. L'interrupteur
+`AGENT_ACTIF` permet de revenir en arrière sans redéploiement de code, et
+l'agent prend le pas sur `REECRITURE_REQUETES` (voir `app/llm.py`).
 
 ## Observabilité
 
@@ -507,6 +595,15 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - L'ingestion **ne supprime pas** un document dont le fichier a disparu.
 - Le golden set est rédigé par le constructeur du système : à enrichir avec
   de vraies questions de révision.
+- **Le golden set multi-sauts est mince, et ses étiquettes ont été corrigées
+  deux fois après avoir vu des résultats.** 14 questions, et l'étendue des
+  faces a été élargie en deux passes : d'abord les quelques pages où une
+  notion est définie, puis la section entière qui la traite. Les corrections
+  s'appuient sur les en-têtes de section du corpus, s'appliquent à toutes les
+  faces et non aux seules qui échouaient, et toutes les mesures déjà prises
+  ont été renotées avec les mêmes étiquettes (`--rejouer`, sans relancer une
+  recherche). Le biais est limité, pas éliminé : sur 14 questions, un
+  déplacement d'étiquette vaut 7 points de couverture.
 - La **fidélité fine** des réponses n'est pas mesurée : il y faudrait un juge
   LLM plus capable que les modèles 3B/8B accessibles sur ce compte.
 - Le générateur du guide PDF (`docs/`) n'est pas versionné : le guide décrit
@@ -526,5 +623,7 @@ repos, contre quelques secondes de réveil à froid sur le premier appel.
 - [x] **Dépôt publié** sur GitHub, CI active
 - [x] **Étape 4b** — évaluation de la génération : citations, sources, refus
 - [ ] **Étape 4c** — fidélité fine, avec un juge LLM plus capable
-- [ ] **Étape 5** — couche agent (LangGraph) pour le multi-étapes
+- [x] **Étape 5** — couche agent : décomposition en aspects, une recherche
+      par aspect, entrelacement. Orchestration maison, sans LangGraph —
+      le graphe tient en trois fonctions et reste lisible dans les traces
 - [ ] **Étape 6** — CD, cache Redis, modèle auto-hébergé (vLLM / Ollama)

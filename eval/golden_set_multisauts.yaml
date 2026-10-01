@@ -1,0 +1,175 @@
+# Golden set multi-sauts : les questions qu'une seule recherche ne suffit pas
+# a satisfaire.
+#
+# Le golden set principal (eval/golden_set.yaml) est sature : le pipeline y
+# obtient 1.000 en Hit@5 et 1.000 sur les quatre controles de generation. Il
+# ne peut donc rien mesurer d'un agent. Ses questions sont a un saut : une
+# question, un passage, une reponse.
+#
+# Ici, chaque question a plusieurs FACES : des elements distincts qu'une
+# bonne reponse doit couvrir. Comparer Dijkstra et Bellman demande les pages
+# de l'un ET celles de l'autre, a trente pages d'ecart dans le meme document.
+#
+# Mesure : une face est couverte des qu'un passage renvoye tombe sur l'une de
+# ses pages. Les pages s'ecrivent en liste [1, 2, 3] ou en plage "9-37".
+#
+# ETENDUE DES FACES — corrigee apres la premiere mesure, et il faut le savoir.
+# La premiere version ne retenait que 3 ou 4 pages par face : le point ou la
+# notion est definie. Resultat, un passage de la page 70 du livre, en plein
+# milieu de la lecon « Newton's Method » (pages 65 a 89), etait compte comme
+# un echec. La mesure confondait « n'a pas trouve la notion » et « a trouve
+# une page voisine de la meme notion ».
+#
+# Une face vaut desormais la SECTION qui traite la notion, etablie en lisant
+# le texte page par page, avec deux garde-fous :
+#   - deux faces d'un meme document ne se recouvrent jamais, sinon une
+#     question de comparaison serait gagnee par un seul passage ;
+#   - l'elargissement s'applique a toutes les faces, pas seulement a celles
+#     ou une strategie echouait. L'elargir apres avoir vu les resultats est
+#     un biais : on le limite en s'appuyant sur le texte, et en renotant
+#     toutes les mesures deja prises avec les memes etiquettes.
+#
+# SECONDE PASSE (meme regle, deux questions oubliees) : « penalite-vs-
+# barriere » gardait encore deux pages par face, et « lagrangien-et-kkt »
+# tracait dans un livre une frontiere que son texte ne porte pas. Les
+# corrections sont justifiees question par question ci-dessous, et les trois
+# mesures deja prises ont ete renotees avec ces etiquettes (--rejouer), sans
+# relancer une seule recherche. A savoir : apres cette passe, l'agent gagne
+# « penalite-vs-barriere » et echoue toujours sur « lagrangien-et-kkt ».
+
+- id: dijkstra-vs-bellman
+  question: "Quelle est la différence entre l'algorithme de Dijkstra et celui de Bellman, et lequel faut-il utiliser si certains arcs ont un poids négatif ?"
+  faces:
+    # Le document traite Dijkstra jusqu'a la page 37, Bellman ensuite.
+    - nom: Dijkstra
+      pages: {"VII. Shortest paths": "9-37"}
+    - nom: Bellman
+      pages: {"VII. Shortest paths": "38-51"}
+
+- id: largeur-vs-profondeur
+  question: "Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun, et dans quel ordre visitent-ils les sommets ?"
+  faces:
+    - nom: parcours en largeur
+      pages: {"III. Breadth first search": "1-13"}
+    - nom: parcours en profondeur
+      pages: {"IV. Depth first search": "1-19"}
+
+- id: arbre-couvrant-vs-plus-courts-chemins
+  question: "Un arbre couvrant de poids minimal donne-t-il les plus courts chemins entre les sommets ? Explique la différence entre les deux problèmes."
+  faces:
+    - nom: arbre couvrant minimal
+      pages: {"VIII. Trees and graphs": "7-26"}
+    - nom: plus courts chemins
+      pages: {"VII. Shortest paths": "1-58"}
+
+- id: rang-et-ordonnancement
+  question: "Quel est le lien entre le rang d'un sommet dans un graphe sans circuit et le calcul des dates au plus tôt d'un ordonnancement ?"
+  faces:
+    # Les deux documents sont entierement consacres a leur notion.
+    - nom: rang d'un sommet
+      pages: {"V. Ranks": "1-19"}
+    - nom: ordonnancement
+      pages: {"VI. Scheduling": "1-14"}
+
+- id: cycles-et-rang
+  question: "Pourquoi faut-il vérifier qu'un graphe est sans circuit avant de calculer les rangs de ses sommets, et comment détecte-t-on un circuit ?"
+  faces:
+    - nom: détection de circuit
+      pages: {"II. Detecting cycles": "1-8"}
+    - nom: rang d'un sommet
+      pages: {"V. Ranks": "1-19"}
+
+- id: khi-deux-vs-student
+  question: "Quand utiliser un test du khi-deux plutôt qu'un test de Student ? Explique ce que chacun compare."
+  faces:
+    - nom: test du khi-deux
+      pages: {"Chapter 4 -Inferential Statistics": "13-17"}
+    - nom: loi de Student
+      pages: {"Chapter 4 -Inferential Statistics": "10-12"}
+
+- id: intervalle-vs-test
+  question: "Quelle est la différence entre construire un intervalle de confiance et réaliser un test d'hypothèse ?"
+  faces:
+    # Deux documents distincts, chacun entierement sur sa notion.
+    - nom: intervalle de confiance
+      pages: {"Chapter 3- Estimation with Intervals": "1-16"}
+    - nom: test d'hypothèse
+      pages: {"Chapter 4 -Inferential Statistics": "1-25"}
+
+- id: acp-valeurs-propres-et-cercle
+  question: "Dans une ACP, quel est le rôle des valeurs propres, et comment les relie-t-on au cercle des corrélations ?"
+  faces:
+    - nom: valeurs propres
+      pages: {"Chapter 2- Principal Component Analysis": "3-11"}
+    - nom: cercle des corrélations
+      pages: {"Chapter 2- Principal Component Analysis": "16,22"}
+
+- id: convexe-vs-fortement-convexe
+  question: "Quelle est la différence entre une fonction convexe et une fonction fortement convexe, et pourquoi cette distinction compte-t-elle pour la convergence ?"
+  faces:
+    # Dans le cours, la convexite occupe les pages 5 a 9, la forte convexite
+    # commence page 10 : les deux faces restent disjointes.
+    - nom: convexité
+      pages: {"Convex_optimization2026FINALVERSION": "5-9"}
+    - nom: forte convexité
+      pages:
+        "Convex_optimization2026FINALVERSION": "10-15"
+        "Numericalmethodsinconvexopt": "52-63"
+
+- id: lagrangien-et-kkt
+  question: "Comment passe-t-on du lagrangien aux conditions de Karush-Kuhn-Tucker dans un problème sous contraintes ?"
+  faces:
+    # Un seul document ici, et c'est un choix : dans
+    # « Numericalmethodsinconvexopt », le lagrangien et les conditions
+    # d'optimalite sont traites dans la MEME section 8.2, et la page 166
+    # enonce a la fois l'existence des multiplicateurs et l'equation de type
+    # KKT. Y tracer une frontiere 154-165 / 166-175, comme le faisait la
+    # premiere version, etiquetait une coupure qui n'existe pas dans le
+    # texte. Le cours « Convex_optimization » separe les deux, lui : le
+    # chapitre 3 introduit le lagrangien et le dual (p. 23-24), la section
+    # 3.2 « THE KARUSH-KUHN-TUCKER THEOREM » suit (p. 25-28).
+    - nom: lagrangien
+      pages: {"Convex_optimization2026FINALVERSION": "23-24"}
+    - nom: conditions KKT
+      pages: {"Convex_optimization2026FINALVERSION": "25-28"}
+
+- id: gradient-vs-newton
+  question: "Compare la descente de gradient et la méthode de Newton : qu'utilise chacune, et laquelle converge le plus vite près de l'optimum ?"
+  faces:
+    # Lecon 3 du livre (descente de gradient) puis lecon 4 (Newton).
+    - nom: descente de gradient
+      pages: {"Numericalmethodsinconvexopt": "43-63"}
+    - nom: méthode de Newton
+      pages: {"Numericalmethodsinconvexopt": "65-89"}
+
+- id: penalite-vs-barriere
+  question: "Quelle est la différence entre une méthode de pénalité et une méthode de barrière en optimisation sous contraintes ?"
+  faces:
+    # Lecon 10, « Penalty and Barrier Methods », p. 195 a 218. Les deux
+    # notions y ont chacune leur idee (10.1.1-10.1.2 et 10.1.3) puis leur
+    # section propre (10.2 « PENALTY METHODS » p. 199-208, 10.3 « BARRIER
+    # METHODS » p. 209-218), d'apres les en-tetes de page du livre. La
+    # premiere version ne retenait que deux pages par notion : un passage de
+    # la page 207, en plein milieu de la section sur la penalite, comptait
+    # comme un echec.
+    - nom: pénalité
+      pages: {"Numericalmethodsinconvexopt": "195-196,199-208"}
+    - nom: barrière
+      pages: {"Numericalmethodsinconvexopt": "197-198,209-218"}
+
+- id: section-doree-vs-bissection
+  question: "Entre la recherche par section dorée et la bissection, laquelle utilise la dérivée, et dans quel cas choisir l'une ou l'autre ?"
+  faces:
+    - nom: section dorée
+      pages: {"Numericalmethodsinconvexopt": "23-26"}
+    - nom: bissection
+      pages: {"Numericalmethodsinconvexopt": "27-34"}
+
+- id: welsh-powell-et-nombre-chromatique
+  question: "Qu'est-ce que le nombre chromatique d'un graphe, et l'algorithme de Welsh & Powell le trouve-t-il toujours ?"
+  faces:
+    # La definition tient en une page ; l'algorithme et ses limites suivent.
+    - nom: nombre chromatique
+      pages: {"IX Coloring": "2-3"}
+    - nom: limites de Welsh & Powell
+      pages: {"IX Coloring": "9-12"}

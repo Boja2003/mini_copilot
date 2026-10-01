@@ -12,6 +12,7 @@ import logging
 from dataclasses import dataclass
 from functools import partial
 
+from .agent import chercher_par_faces
 from .config import get_settings
 from .mistral import LLMError, appeler_chat
 from .retrieval import (
@@ -64,11 +65,19 @@ class Reponse:
 async def _rechercher(question: str) -> list[Passage]:
     """Choisit la strategie de retrieval selon la configuration.
 
-    La reecriture de requete ajoute un appel LLM a chaque question : elle
-    ne s'active que si les chiffres de eval/ montrent qu'elle en vaut le
-    cout.
+    Les deux strategies couteuses ajoutent chacune un appel LLM a chaque
+    question : elles ne s'activent que si les chiffres de eval/ montrent
+    qu'elles en valent le cout.
+
+    L'agent passe AVANT la reecriture, et l'exclut : il traduit deja la
+    question en requetes anglaises, et la mesure multi-sauts montre que
+    fusionner par RRF des requetes reecrites concentre les passages sur un
+    seul aspect — exactement ce que l'agent cherche a eviter.
     """
-    if get_settings().reecriture_requetes:
+    settings = get_settings()
+    if settings.agent_actif:
+        return (await chercher_par_faces(question)).passages
+    if settings.reecriture_requetes:
         return await chercher_avec_reecriture(question)
     return await chercher(question)
 

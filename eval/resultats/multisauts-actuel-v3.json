@@ -1,0 +1,596 @@
+{
+  "nom": "actuel-v3",
+  "strategie": "actuel",
+  "date": "2026-10-01T10:02:44+00:00",
+  "commit": "e91a65c+modifications",
+  "golden_set": "91f88809925a",
+  "parametres": {
+    "k": 5,
+    "reecriture_requetes": true,
+    "modele_reecriture": "ministral-8b-latest",
+    "modele_decomposition": "ministral-8b-latest"
+  },
+  "agregats": {
+    "n": 14,
+    "question_brute": 0,
+    "couverture": 0.75,
+    "couverture_totale": 0.5,
+    "latence_mediane_ms": 873
+  },
+  "questions": [
+    {
+      "id": "dijkstra-vs-bellman",
+      "question": "Quelle est la différence entre l'algorithme de Dijkstra et celui de Bellman, et lequel faut-il utiliser si certains arcs ont un poids négatif ?",
+      "duree_ms": 1578,
+      "requetes": [
+        "Quelle est la différence entre l'algorithme de Dijkstra et celui de Bellman, et lequel faut-il utiliser si certains arcs ont un poids négatif ?",
+        "Dijkstra's algorithm vs Bellman-Ford algorithm comparison",
+        "handling negative edge weights Dijkstra Bellman-Ford algorithm selection"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 39,
+          "distance": 0.137
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 38,
+          "distance": 0.1368
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 43,
+          "distance": 0.1595
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 42,
+          "distance": 0.159
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 40,
+          "distance": 0.1518
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "Dijkstra"
+      ]
+    },
+    {
+      "id": "largeur-vs-profondeur",
+      "question": "Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun, et dans quel ordre visitent-ils les sommets ?",
+      "duree_ms": 1100,
+      "requetes": [
+        "Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun, et dans quel ordre visitent-ils les sommets ?",
+        "breadth-first search vs depth-first search data structures",
+        "BFS traversal order vs DFS traversal order graph nodes queue stack"
+      ],
+      "renvoyes": [
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.1551
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 1,
+          "distance": 0.171
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.1852
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 5,
+          "distance": 0.1636
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 13,
+          "distance": 0.1719
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "arbre-couvrant-vs-plus-courts-chemins",
+      "question": "Un arbre couvrant de poids minimal donne-t-il les plus courts chemins entre les sommets ? Explique la différence entre les deux problèmes.",
+      "duree_ms": 873,
+      "requetes": [
+        "Un arbre couvrant de poids minimal donne-t-il les plus courts chemins entre les sommets ? Explique la différence entre les deux problèmes.",
+        "minimum spanning tree shortest path difference",
+        "minimum spanning tree vs Dijkstra's algorithm graph theory"
+      ],
+      "renvoyes": [
+        {
+          "document": "VIII. Trees and graphs",
+          "page": 8,
+          "distance": 0.1755
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.1448
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 29,
+          "distance": 0.1801
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 8,
+          "distance": 0.142
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.1763
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "rang-et-ordonnancement",
+      "question": "Quel est le lien entre le rang d'un sommet dans un graphe sans circuit et le calcul des dates au plus tôt d'un ordonnancement ?",
+      "duree_ms": 867,
+      "requetes": [
+        "Quel est le lien entre le rang d'un sommet dans un graphe sans circuit et le calcul des dates au plus tôt d'un ordonnancement ?",
+        "topological sorting in directed acyclic graphs and earliest start times",
+        "critical path method and topological ordering in project scheduling"
+      ],
+      "renvoyes": [
+        {
+          "document": "VI. Scheduling",
+          "page": 7,
+          "distance": 0.1714
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.1859
+        },
+        {
+          "document": "V. Ranks",
+          "page": 19,
+          "distance": 0.1808
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 6,
+          "distance": 0.203
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 2,
+          "distance": 0.2117
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "cycles-et-rang",
+      "question": "Pourquoi faut-il vérifier qu'un graphe est sans circuit avant de calculer les rangs de ses sommets, et comment détecte-t-on un circuit ?",
+      "duree_ms": 963,
+      "requetes": [
+        "Pourquoi faut-il vérifier qu'un graphe est sans circuit avant de calculer les rangs de ses sommets, et comment détecte-t-on un circuit ?",
+        "acyclic graph importance in vertex ranking algorithms",
+        "cycle detection algorithms in undirected graphs (DFS, Union-Find, Floyd-Warshall)"
+      ],
+      "renvoyes": [
+        {
+          "document": "II. Detecting cycles",
+          "page": 2,
+          "distance": 0.1824
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 3,
+          "distance": 0.1896
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 1,
+          "distance": 0.1665
+        },
+        {
+          "document": "V. Ranks",
+          "page": 19,
+          "distance": 0.2108
+        },
+        {
+          "document": "V. Ranks",
+          "page": 1,
+          "distance": 0.2117
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "khi-deux-vs-student",
+      "question": "Quand utiliser un test du khi-deux plutôt qu'un test de Student ? Explique ce que chacun compare.",
+      "duree_ms": 931,
+      "requetes": [
+        "Quand utiliser un test du khi-deux plutôt qu'un test de Student ? Explique ce que chacun compare.",
+        "chi-square test vs t-test when to use",
+        "chi-square test categorical vs continuous data hypothesis testing"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.173
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1786
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.1864
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 13,
+          "distance": 0.1828
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 14,
+          "distance": 0.1814
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "loi de Student"
+      ]
+    },
+    {
+      "id": "intervalle-vs-test",
+      "question": "Quelle est la différence entre construire un intervalle de confiance et réaliser un test d'hypothèse ?",
+      "duree_ms": 770,
+      "requetes": [
+        "Quelle est la différence entre construire un intervalle de confiance et réaliser un test d'hypothèse ?",
+        "confidence interval construction vs hypothesis testing statistical differences",
+        "interval estimation vs significance testing in inferential statistics"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 9,
+          "distance": 0.1969
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 10,
+          "distance": 0.1954
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 4,
+          "distance": 0.2104
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 10,
+          "distance": 0.1908
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.2038
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "acp-valeurs-propres-et-cercle",
+      "question": "Dans une ACP, quel est le rôle des valeurs propres, et comment les relie-t-on au cercle des corrélations ?",
+      "duree_ms": 1156,
+      "requetes": [
+        "Dans une ACP, quel est le rôle des valeurs propres, et comment les relie-t-on au cercle des corrélations ?",
+        "eigenvalues role in principal component analysis PCA",
+        "PCA correlation circle eigenvalues loadings interpretation"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 13,
+          "distance": 0.1675
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 10,
+          "distance": 0.1726
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 11,
+          "distance": 0.1833
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 7,
+          "distance": 0.1972
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.2003
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "cercle des corrélations"
+      ]
+    },
+    {
+      "id": "convexe-vs-fortement-convexe",
+      "question": "Quelle est la différence entre une fonction convexe et une fonction fortement convexe, et pourquoi cette distinction compte-t-elle pour la convergence ?",
+      "duree_ms": 856,
+      "requetes": [
+        "Quelle est la différence entre une fonction convexe et une fonction fortement convexe, et pourquoi cette distinction compte-t-elle pour la convergence ?",
+        "convex functions vs strongly convex functions optimization theory",
+        "strong convexity Lipschitz continuity gradient descent convergence rates"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 52,
+          "distance": 0.1341
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 52,
+          "distance": 0.1287
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 10,
+          "distance": 0.1603
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 53,
+          "distance": 0.1393
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 53,
+          "distance": 0.1172
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "convexité"
+      ]
+    },
+    {
+      "id": "lagrangien-et-kkt",
+      "question": "Comment passe-t-on du lagrangien aux conditions de Karush-Kuhn-Tucker dans un problème sous contraintes ?",
+      "duree_ms": 829,
+      "requetes": [
+        "Comment passe-t-on du lagrangien aux conditions de Karush-Kuhn-Tucker dans un problème sous contraintes ?",
+        "Lagrangian duality and Karush-Kuhn-Tucker (KKT) conditions derivation",
+        "constrained optimization Lagrangian multipliers KKT necessary conditions"
+      ],
+      "renvoyes": [
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 25,
+          "distance": 0.1272
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 25,
+          "distance": 0.1271
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 27,
+          "distance": 0.1358
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 168,
+          "distance": 0.1355
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 24,
+          "distance": 0.1331
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "lagrangien"
+      ]
+    },
+    {
+      "id": "gradient-vs-newton",
+      "question": "Compare la descente de gradient et la méthode de Newton : qu'utilise chacune, et laquelle converge le plus vite près de l'optimum ?",
+      "duree_ms": 760,
+      "requetes": [
+        "Compare la descente de gradient et la méthode de Newton : qu'utilise chacune, et laquelle converge le plus vite près de l'optimum ?",
+        "gradient descent vs Newton's method optimization algorithms comparison",
+        "gradient descent convergence rate local minimum quadratic functions Newton's method"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 4,
+          "distance": 0.1107
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 79,
+          "distance": 0.1209
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 29,
+          "distance": 0.1316
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 79,
+          "distance": 0.1016
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 68,
+          "distance": 0.1323
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "descente de gradient"
+      ]
+    },
+    {
+      "id": "penalite-vs-barriere",
+      "question": "Quelle est la différence entre une méthode de pénalité et une méthode de barrière en optimisation sous contraintes ?",
+      "duree_ms": 681,
+      "requetes": [
+        "Quelle est la différence entre une méthode de pénalité et une méthode de barrière en optimisation sous contraintes ?",
+        "penalty method vs barrier method in constrained optimization",
+        "Lagrange multiplier methods external penalty vs interior point methods"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 218,
+          "distance": 0.1568
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 198,
+          "distance": 0.1391
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 6,
+          "distance": 0.1722
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 175,
+          "distance": 0.1585
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 207,
+          "distance": 0.1419
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "pénalité"
+      ]
+    },
+    {
+      "id": "section-doree-vs-bissection",
+      "question": "Entre la recherche par section dorée et la bissection, laquelle utilise la dérivée, et dans quel cas choisir l'une ou l'autre ?",
+      "duree_ms": 1602,
+      "requetes": [
+        "Entre la recherche par section dorée et la bissection, laquelle utilise la dérivée, et dans quel cas choisir l'une ou l'autre ?",
+        "golden section search vs bisection method derivative usage",
+        "gradient-based optimization golden section vs derivative-free methods bisection method comparison"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.1512
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.1649
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 27,
+          "distance": 0.1697
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1806
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 28,
+          "distance": 0.1817
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "welsh-powell-et-nombre-chromatique",
+      "question": "Qu'est-ce que le nombre chromatique d'un graphe, et l'algorithme de Welsh & Powell le trouve-t-il toujours ?",
+      "duree_ms": 792,
+      "requetes": [
+        "Qu'est-ce que le nombre chromatique d'un graphe, et l'algorithme de Welsh & Powell le trouve-t-il toujours ?",
+        "chromatic number graph theory definition",
+        "Welsh Powell algorithm chromatic number correctness limitations"
+      ],
+      "renvoyes": [
+        {
+          "document": "IX Coloring",
+          "page": 4,
+          "distance": 0.1253
+        },
+        {
+          "document": "IX Coloring",
+          "page": 3,
+          "distance": 0.1944
+        },
+        {
+          "document": "IX Coloring",
+          "page": 5,
+          "distance": 0.201
+        },
+        {
+          "document": "IX Coloring",
+          "page": 2,
+          "distance": 0.1456
+        },
+        {
+          "document": "IX Coloring",
+          "page": 12,
+          "distance": 0.1753
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    }
+  ]
+}

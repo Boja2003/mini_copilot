@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     reecriture_requetes: bool = False
     mistral_reecriture_model: str = "ministral-8b-latest"
 
+    # Couche agent (voir app/agent.py) : decoupe la question en aspects et
+    # lance une recherche par aspect. Mesure a l'appui (eval/multisauts.py) :
+    # 13 questions multi-sauts completes sur 14 contre 9 en production, sans
+    # perte a un saut (Hit@5 1.000) ni sur les controles de generation (tous
+    # a 1.000) ; cout = 2 s de latence par question. Prend le pas sur
+    # reecriture_requetes. Desactivee par defaut : c'est l'environnement qui
+    # l'active, et la couper ne demande pas un deploiement de code.
+    agent_actif: bool = False
+
     # Observabilite (voir app/observabilite.py). Sans les deux cles, le
     # tracage est desactive et l'application tourne exactement comme avant.
     langfuse_public_key: str | None = None

@@ -1,0 +1,564 @@
+{
+  "nom": "temoin",
+  "strategie": "simple",
+  "date": "2026-10-01T10:15:36+00:00",
+  "commit": "e91a65c+modifications",
+  "golden_set": "43e335f2e52a",
+  "renote_depuis": "simple",
+  "date_des_recherches": "2026-10-01T10:02:29+00:00",
+  "parametres": {
+    "k": 5,
+    "reecriture_requetes": false,
+    "modele_reecriture": "ministral-8b-latest",
+    "modele_decomposition": "ministral-8b-latest"
+  },
+  "agregats": {
+    "n": 14,
+    "question_brute": 14,
+    "couverture": 0.857,
+    "couverture_totale": 0.714,
+    "latence_mediane_ms": 239
+  },
+  "questions": [
+    {
+      "id": "dijkstra-vs-bellman",
+      "question": "Quelle est la différence entre l'algorithme de Dijkstra et celui de Bellman, et lequel faut-il utiliser si certains arcs ont un poids négatif ?",
+      "duree_ms": 865,
+      "requetes": [
+        "Quelle est la différence entre l'algorithme de Dijkstra et celui de Bellman, et lequel faut-il utiliser si certains arcs ont un poids négatif ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 39,
+          "distance": 0.1523
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 38,
+          "distance": 0.1565
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.165
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.1674
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 43,
+          "distance": 0.1685
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "largeur-vs-profondeur",
+      "question": "Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun, et dans quel ordre visitent-ils les sommets ?",
+      "duree_ms": 261,
+      "requetes": [
+        "Compare le parcours en largeur et le parcours en profondeur : quelle structure de données utilise chacun, et dans quel ordre visitent-ils les sommets ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "IV. Depth first search",
+          "page": 18,
+          "distance": 0.1972
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 11,
+          "distance": 0.1979
+        },
+        {
+          "document": "IV. Depth first search",
+          "page": 1,
+          "distance": 0.2012
+        },
+        {
+          "document": "III. Breadth first search",
+          "page": 1,
+          "distance": 0.2069
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 53,
+          "distance": 0.2096
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "arbre-couvrant-vs-plus-courts-chemins",
+      "question": "Un arbre couvrant de poids minimal donne-t-il les plus courts chemins entre les sommets ? Explique la différence entre les deux problèmes.",
+      "duree_ms": 215,
+      "requetes": [
+        "Un arbre couvrant de poids minimal donne-t-il les plus courts chemins entre les sommets ? Explique la différence entre les deux problèmes."
+      ],
+      "renvoyes": [
+        {
+          "document": "VII. Shortest paths",
+          "page": 8,
+          "distance": 0.1422
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 1,
+          "distance": 0.1447
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 53,
+          "distance": 0.1696
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 58,
+          "distance": 0.1702
+        },
+        {
+          "document": "VII. Shortest paths",
+          "page": 10,
+          "distance": 0.1764
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "arbre couvrant minimal"
+      ]
+    },
+    {
+      "id": "rang-et-ordonnancement",
+      "question": "Quel est le lien entre le rang d'un sommet dans un graphe sans circuit et le calcul des dates au plus tôt d'un ordonnancement ?",
+      "duree_ms": 815,
+      "requetes": [
+        "Quel est le lien entre le rang d'un sommet dans un graphe sans circuit et le calcul des dates au plus tôt d'un ordonnancement ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "VI. Scheduling",
+          "page": 4,
+          "distance": 0.1858
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 12,
+          "distance": 0.1909
+        },
+        {
+          "document": "V. Ranks",
+          "page": 19,
+          "distance": 0.1916
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 7,
+          "distance": 0.1919
+        },
+        {
+          "document": "VI. Scheduling",
+          "page": 1,
+          "distance": 0.1994
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "cycles-et-rang",
+      "question": "Pourquoi faut-il vérifier qu'un graphe est sans circuit avant de calculer les rangs de ses sommets, et comment détecte-t-on un circuit ?",
+      "duree_ms": 247,
+      "requetes": [
+        "Pourquoi faut-il vérifier qu'un graphe est sans circuit avant de calculer les rangs de ses sommets, et comment détecte-t-on un circuit ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "II. Detecting cycles",
+          "page": 1,
+          "distance": 0.1904
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 2,
+          "distance": 0.1977
+        },
+        {
+          "document": "II. Detecting cycles",
+          "page": 3,
+          "distance": 0.2004
+        },
+        {
+          "document": "I. Generalities",
+          "page": 24,
+          "distance": 0.2088
+        },
+        {
+          "document": "V. Ranks",
+          "page": 17,
+          "distance": 0.2099
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "khi-deux-vs-student",
+      "question": "Quand utiliser un test du khi-deux plutôt qu'un test de Student ? Explique ce que chacun compare.",
+      "duree_ms": 249,
+      "requetes": [
+        "Quand utiliser un test du khi-deux plutôt qu'un test de Student ? Explique ce que chacun compare."
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 11,
+          "distance": 0.1726
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1728
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 15,
+          "distance": 0.1816
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 13,
+          "distance": 0.1826
+        },
+        {
+          "document": "Chapter 4 -Inferential Statistics",
+          "page": 12,
+          "distance": 0.1846
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "intervalle-vs-test",
+      "question": "Quelle est la différence entre construire un intervalle de confiance et réaliser un test d'hypothèse ?",
+      "duree_ms": 196,
+      "requetes": [
+        "Quelle est la différence entre construire un intervalle de confiance et réaliser un test d'hypothèse ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 14,
+          "distance": 0.1953
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 10,
+          "distance": 0.1957
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 9,
+          "distance": 0.1971
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 8,
+          "distance": 0.1981
+        },
+        {
+          "document": "Chapter 3- Estimation with Intervals",
+          "page": 7,
+          "distance": 0.1997
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "test d'hypothèse"
+      ]
+    },
+    {
+      "id": "acp-valeurs-propres-et-cercle",
+      "question": "Dans une ACP, quel est le rôle des valeurs propres, et comment les relie-t-on au cercle des corrélations ?",
+      "duree_ms": 166,
+      "requetes": [
+        "Dans une ACP, quel est le rôle des valeurs propres, et comment les relie-t-on au cercle des corrélations ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 16,
+          "distance": 0.1988
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 19,
+          "distance": 0.2023
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 10,
+          "distance": 0.2045
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 11,
+          "distance": 0.205
+        },
+        {
+          "document": "Chapter 2- Principal Component Analysis",
+          "page": 22,
+          "distance": 0.2086
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "convexe-vs-fortement-convexe",
+      "question": "Quelle est la différence entre une fonction convexe et une fonction fortement convexe, et pourquoi cette distinction compte-t-elle pour la convergence ?",
+      "duree_ms": 821,
+      "requetes": [
+        "Quelle est la différence entre une fonction convexe et une fonction fortement convexe, et pourquoi cette distinction compte-t-elle pour la convergence ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 52,
+          "distance": 0.1655
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 10,
+          "distance": 0.1719
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 11,
+          "distance": 0.1733
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 10,
+          "distance": 0.1774
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 15,
+          "distance": 0.1779
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "convexité"
+      ]
+    },
+    {
+      "id": "lagrangien-et-kkt",
+      "question": "Comment passe-t-on du lagrangien aux conditions de Karush-Kuhn-Tucker dans un problème sous contraintes ?",
+      "duree_ms": 213,
+      "requetes": [
+        "Comment passe-t-on du lagrangien aux conditions de Karush-Kuhn-Tucker dans un problème sous contraintes ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 25,
+          "distance": 0.1741
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 25,
+          "distance": 0.1788
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 7,
+          "distance": 0.18
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 27,
+          "distance": 0.1808
+        },
+        {
+          "document": "Convex_optimization2026FINALVERSION",
+          "page": 24,
+          "distance": 0.184
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "gradient-vs-newton",
+      "question": "Compare la descente de gradient et la méthode de Newton : qu'utilise chacune, et laquelle converge le plus vite près de l'optimum ?",
+      "duree_ms": 239,
+      "requetes": [
+        "Compare la descente de gradient et la méthode de Newton : qu'utilise chacune, et laquelle converge le plus vite près de l'optimum ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 4,
+          "distance": 0.1526
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 70,
+          "distance": 0.1591
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 29,
+          "distance": 0.161
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 30,
+          "distance": 0.1638
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 79,
+          "distance": 0.1645
+        }
+      ],
+      "couverture": 0.5,
+      "couverture_totale": 0.0,
+      "faces_manquantes": [
+        "descente de gradient"
+      ]
+    },
+    {
+      "id": "penalite-vs-barriere",
+      "question": "Quelle est la différence entre une méthode de pénalité et une méthode de barrière en optimisation sous contraintes ?",
+      "duree_ms": 160,
+      "requetes": [
+        "Quelle est la différence entre une méthode de pénalité et une méthode de barrière en optimisation sous contraintes ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 198,
+          "distance": 0.1673
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 197,
+          "distance": 0.1769
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 6,
+          "distance": 0.1784
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 218,
+          "distance": 0.1845
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 196,
+          "distance": 0.1883
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "section-doree-vs-bissection",
+      "question": "Entre la recherche par section dorée et la bissection, laquelle utilise la dérivée, et dans quel cas choisir l'une ou l'autre ?",
+      "duree_ms": 176,
+      "requetes": [
+        "Entre la recherche par section dorée et la bissection, laquelle utilise la dérivée, et dans quel cas choisir l'une ou l'autre ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 40,
+          "distance": 0.168
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 27,
+          "distance": 0.17
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 27,
+          "distance": 0.1716
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 26,
+          "distance": 0.1767
+        },
+        {
+          "document": "Numericalmethodsinconvexopt",
+          "page": 28,
+          "distance": 0.1819
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    },
+    {
+      "id": "welsh-powell-et-nombre-chromatique",
+      "question": "Qu'est-ce que le nombre chromatique d'un graphe, et l'algorithme de Welsh & Powell le trouve-t-il toujours ?",
+      "duree_ms": 202,
+      "requetes": [
+        "Qu'est-ce que le nombre chromatique d'un graphe, et l'algorithme de Welsh & Powell le trouve-t-il toujours ?"
+      ],
+      "renvoyes": [
+        {
+          "document": "IX Coloring",
+          "page": 4,
+          "distance": 0.1368
+        },
+        {
+          "document": "IX Coloring",
+          "page": 10,
+          "distance": 0.1753
+        },
+        {
+          "document": "IX Coloring",
+          "page": 9,
+          "distance": 0.185
+        },
+        {
+          "document": "IX Coloring",
+          "page": 5,
+          "distance": 0.201
+        },
+        {
+          "document": "IX Coloring",
+          "page": 3,
+          "distance": 0.2079
+        }
+      ],
+      "couverture": 1.0,
+      "couverture_totale": 1.0,
+      "faces_manquantes": []
+    }
+  ]
+}

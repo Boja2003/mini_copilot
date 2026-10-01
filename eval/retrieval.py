@@ -24,6 +24,7 @@ from collections.abc import Awaitable, Callable
 import yaml
 
 from app import retrieval
+from app.agent import chercher_par_faces
 from app.boucle import configurer as configurer_boucle
 from app.config import get_settings
 from app.db import close_pool, get_pool, open_pool
@@ -59,10 +60,21 @@ async def _reecriture(question: str, nb: int) -> tuple[list[Passage], list[str]]
     return detail.passages, detail.requetes
 
 
+async def _agent(question: str, nb: int) -> tuple[list[Passage], list[str]]:
+    # La couche agent est une strategie de retrieval comme les autres : son
+    # gain se mesure sur le golden set multi-sauts (eval/multisauts.py), mais
+    # elle changerait le retrieval de TOUTES les questions. Ce qu'on verifie
+    # ici est l'autre moitie de la decision : qu'elle ne perde rien sur les
+    # questions a un saut, qui sont le gros de l'usage.
+    detail = await chercher_par_faces(question, nb)
+    return detail.passages, detail.requetes
+
+
 # Les variantes de retrieval a comparer. En ajouter une = l'inscrire ici.
 STRATEGIES: dict[str, Strategie] = {
     "hybride": _hybride,
     "reecriture": _reecriture,
+    "agent": _agent,
 }
 
 
